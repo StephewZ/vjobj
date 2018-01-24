@@ -1,0 +1,31 @@
+// mixin border
+border-radius()
+  -webkit-border-radius: arguments
+  -moz-border-radius: arguments
+  border-radius: arguments
+
+box-shadow()
+  -webkit-box-shadow arguments
+  -moz-box-shadow arguments
+  box-shadow arguments
+  html.ie8 &,
+  html.ie7 &,
+  html.ie6 &
+    border 1px solid arguments[length(arguments) - 1]
+    
+// no wrap
+no-wrap()
+  text-overflow: ellipsis
+  overflow: hidden
+  white-space: nowrap
+  
+// 扩展点击区域
+extend-click()
+  position: relative
+  &:before
+    content: ''
+    position: absolute
+    top: -10px
+    left: -10px
+    right: -10px
+    bottom: -10px  
