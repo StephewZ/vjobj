@@ -26,7 +26,7 @@
 		<el-col type="flex" class="row-bg toolbar" justify="space-between">
 			<el-col :span="4">
 				<el-button-group>
-					<el-button type="danger" size="mini" @click="" :disabled="this.msgList.length===0 || this.loadOn.tableLoading">批量删除</el-button>
+					<el-button type="danger" size="mini" @click="handleDels" :disabled="this.msgList.length===0 || this.loadOn.tableLoading">批量删除</el-button>
 		  		<el-button size="mini" @click="handleAdd" :disabled="this.loadOn.tableLoading">添加</el-button>
 	  		</el-button-group>
   		</el-col>
@@ -41,7 +41,7 @@
 			</el-col>
 		</el-col>
 
-		<el-table :data="msgList" highlight-current-row v-loading="loadOn.tableLoading" @sort-change="sortChange">
+		<el-table :data="msgList" highlight-current-row v-loading="loadOn.tableLoading" @sort-change="sortChange" @selection-change="selectChange">
 			<el-table-column type="selection">
 			</el-table-column>
 			<el-table-column type="index" prop="pipe_id">
@@ -51,6 +51,8 @@
 			<el-table-column prop="parent" label="上级机构">
 			</el-table-column>
 			<el-table-column prop="creator" label="创建用户">
+			</el-table-column>
+			<el-table-column prop="remark" label="机构描述">
 			</el-table-column>
 			<el-table-column prop="made_time" label="创建时间" sortable="custom">
 			</el-table-column>
@@ -79,20 +81,27 @@
 
 	  <!--添加界面-->
 		<el-dialog title="添加机构" :visible.sync="loadOn.addFormVisible" :close-on-click-modal="true">
-			<el-form label-width="80px" :rules="addFormRules" ref="addForm">
+			<el-form :model="addForm" label-width="80px" :rules="addFormRules">
 				<el-form-item label="机构名称" prop="name">
-					<el-input  auto-complete="off"></el-input>
+					<el-input  v-model="addForm.name" auto-complete="off" maxlength="25" minlength="1"></el-input>
 				</el-form-item>
 				<el-form-item label="上级机构" prop="parent">
 					<el-cascader
 				    placeholder="请选择机构"
 				    :options="options"
 				    filterable
+				    v-model="addForm.pipe"
 				    change-on-select
 				  ></el-cascader>
 				</el-form-item>
-				<el-form-item label="年龄">
-					<el-input-number :min="0" :max="200"></el-input-number>
+				<el-form-item label="机构描述" prop="remark">
+					<el-input
+					  type="textarea"
+					  :rows="2"
+					  maxlength="100"
+					  v-model="addForm.remark"
+					  placeholder="机构描述">
+					</el-input>
 				</el-form-item>
 			</el-form>
 			<div slot="footer" class="dialog-footer">
@@ -112,15 +121,18 @@
 				    placeholder="请选择机构"
 				    :options="options"
 				    filterable
-				    v-model="editForm.pipe_id"
+				    v-model="editForm.pipe"
 				    change-on-select
 				  ></el-cascader>
 				</el-form-item>
-				<el-form-item label="年龄">
-					<el-input-number v-model="editForm.age" :min="0" :max="200"></el-input-number>
-				</el-form-item>
-				<el-form-item label="地址">
-					<el-input type="textarea" v-model="editForm.age"></el-input>
+				<el-form-item label="机构描述" prop="remark">
+					<el-input
+					  type="textarea"
+					  :rows="2"
+					  maxlength="100"
+					  v-model="editForm.remark"
+					  placeholder="机构描述">
+					</el-input>
 				</el-form-item>
 			</el-form>
 			<div slot="footer" class="dialog-footer">
@@ -133,9 +145,9 @@
 </template>
 <script>
 	import Crumb from 'components/crumb/crumb'
-	import {getData} from 'api/data'
+	import {getData, sendData} from 'api/data'
 	import {urls, ERR_OK} from 'api/config'
-	import {formatList} from 'common/js/math'
+	import {formatList, comparePipe} from 'common/js/math'
 
 	export default {
 	  name: 'group',
@@ -161,31 +173,30 @@
 	  		},
 	  		total: 0,
 	  		msgList: [],
-	  		options: [{
-          value: 'ziyuan',
-          label: '资源',
-          children: [{
-            value: 'axure',
-            label: 'Axure Components'
-          }, {
-            value: 'sketch',
-            label: 'Sketch Templates'
-          }, {
-            value: 'jiaohu',
-            label: '组件交互文档'
-          }]
-        }],
+	  		delList: [],
+	  		options: [],
         addFormRules: {
 					name: [
-						{ required: true, message: '请输入姓名', trigger: 'blur' }
+						{ required: true, message: '请输入机构名称', trigger: 'blur' }
+					],
+					parent: [
+						{ required: true, message: '请选择上级机构', trigger: 'change' }
 					]
 				},
         editFormRules: {
 					name: [
-						{ required: true, message: '请输入姓名', trigger: 'blur' }
+						{ required: true, message: '请输入机构名称', trigger: 'blur' }
+					],
+					parent: [
+						{ required: true, message: '请选择上级机构', trigger: 'change' }
 					]
 				},
-				editForm: {}
+				editForm: {},
+				addForm: {
+					name: '',
+					pipe: [],
+					remark: ''
+				}
 	  	}
 	  },
 	  created () {
@@ -247,24 +258,85 @@
 	  		this._getMsgList()
 	  	},
 	  	handleSizeChange (val) {
-        console.log(`每页 ${val} 条`)
+        this.filters.pageSize = val
+        this._getMsgList()
       },
       handleCurrentChange (val) {
-        console.log(`当前页: ${val}`)
+        this.filters.currentPage = val
+        this._getMsgList()
       },
-      handleDel: function (row) {
-		  	console.log(row)
+      selectChange (val) {
+      	this.delList = val
+      	val.sort(comparePipe('pipe_id'))
+      	console.log(val)
+      },
+      handleDel (row) {
+		  	this.$confirm(`确认删除机构：${row.name} 吗？`, '提示', {type: 'warning'}).then(() => {
+		  		let tip = urls.inst.instDel.tips
+		  		let url = urls.inst.instDel.url
+		  		const data = Object.assign({}, tip, {
+		  			'delList': [{'pipe_id': row.pipe_id}]
+		  		})
+          sendData(data, url).then((res) => {
+	          if (res.code === ERR_OK) {
+	          }
+	        })
+        }).catch(() => {
+        });
+      },
+      handleDels () {
+      	this.$confirm('只有末级机构才能删除，是否继续？', '提示', {type: 'warning'}).then(() => {
+		  		let tip = urls.inst.instDel.tips
+		  		let url = urls.inst.instDel.url
+		  		const data = Object.assign({}, tip, {
+		  			'delList': this.delList
+		  		})
+          sendData(data, url).then((res) => {
+	          if (res.code === ERR_OK) {
+	          }
+	        })
+        }).catch(() => {
+        });
 			},
 			handleAdd () {
 				this.loadOn.addFormVisible = true
 			},
 			handleEdit (row) {
 				this.loadOn.editFormVisible = true
-				this.editForm = Object.assign({}, row)
-				console.log(row)
+				let len = this.options[0].value.length
+				let pipe = []
+				for (let i = 0; i < (row.pipe_id.length - len) / 4; i++) {
+					pipe.push(row.pipe_id.slice(0, len + i * 4))
+				}
+
+				this.editForm = Object.assign({'pipe': pipe}, row)
 			},
 			addSubmit () {
-
+				if (this.addForm !== '' && this.addForm.pipe.length !== 0) {
+					let tip = urls.inst.instAdd.tips
+					let url = urls.inst.instAdd.url
+					const data = Object.assign({}, tip, this.addForm)
+					sendData(data, url).then((res) => {
+	          if (res.code === ERR_OK) {
+	          	this.$message({
+			          showClose: true,
+			          message: '添加成功！',
+			          type: 'success'
+			        })
+	          	this._getMsgList()
+	  					this._getIndex()
+	          }
+	        })
+				} else {
+					this.$message({
+	          showClose: true,
+	          dangerouslyUseHTMLString: true,
+	          message: '带<span style="color: red"> * </span>号的选项不能为空！',
+	          type: 'warning'
+	        })
+					return false
+				}
+				
 			},
 			editSubmit () {
 				console.log(this.editForm)

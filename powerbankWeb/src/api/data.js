@@ -13,3 +13,16 @@ export function getData (tips, url) {
 		return Promise.resolve(res.data)
 	})
 }
+
+export function sendData (tips, url) {
+	const data = Object.assign({}, commonParams, {
+		format: 'json',
+		tips: tips
+	})
+
+	return axios.post(url, {
+		params: data
+	}).then((res) => {
+		return Promise.resolve(res.data)
+	})
+}

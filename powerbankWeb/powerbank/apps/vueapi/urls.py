@@ -13,5 +13,7 @@ urlpatterns = [
 	url(r'^userinfo/$', get_userinfo, name="userinfo"),
 	url(r'^logout/$', logout_view, name="logout"),
 	url(r'^index/$', main.index, name="index"),
-	url(r'^instList/$', inst.instList, name="instList")
+	url(r'^instList/$', inst.instList, name="instList"),
+	url(r'^instAdd/$', inst.instAdd, name="instAdd"),
+	url(r'^instDel/$', inst.instDel, name="instDel"),
 	]

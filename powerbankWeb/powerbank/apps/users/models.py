@@ -51,7 +51,7 @@ class accounts(models.Model):
 class institutions(models.Model): #机构表
 	pipe_id = models.CharField(max_length=255,default = '') #管道id
 	parent_id = models.IntegerField(null=True, blank=True) #父节点id
-	is_leaf = models.BooleanField(default=False) #节点末端判断
+	is_leaf = models.BooleanField(default=True) #节点末端判断
 	inst_type = models.CharField(max_length=255,default = '') #机构类型
 	name = models.CharField(max_length=50, default='') #机构名称
 	creator = models.IntegerField(null=True, blank=True) #创建用户id user_id

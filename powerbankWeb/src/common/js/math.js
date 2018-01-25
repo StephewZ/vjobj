@@ -23,6 +23,25 @@ export function formatList (options) {
 			cloneNewOp.push(obj)
 		}
 	}
-	console.log(newOptions)
 	return newOptions
+}
+
+export function comparePipe (prop) {
+	return ((a, b) => {
+		let v1 = a[prop]
+		let v2 = b[prop]
+		if (v1.length === v2.length) {
+			v1 = v1.split('.')
+			v2 = v2.split('.')
+			for (let i = 0; i < v1.length; i++) {
+				if (v1[i] - v2[i] !== 0) {
+					return v2[i] - v1[i]
+				}
+			}
+		} else if (v1.length < v2.length) {
+			return 1
+		} else {
+			return -1
+		}
+	})
 }

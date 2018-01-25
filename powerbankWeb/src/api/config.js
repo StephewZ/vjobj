@@ -30,6 +30,18 @@ export const urls = {
 			tips: {
 				'tip': 'instIndex'
 			}
+		},
+		instAdd: {
+			url: '/instAdd/',
+			tips: {
+				'tip': 'instAdd'
+			}
+		},
+		instDel: {
+			url: '/instDel/',
+			tips: {
+				'tip': 'instDel'
+			}
 		}
 	}
 }
