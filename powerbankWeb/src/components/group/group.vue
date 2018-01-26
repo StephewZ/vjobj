@@ -222,12 +222,6 @@
           this.loadOn.refreshLoad = false
         })
 	  	},
-	  	btnLoadOn () {
-
-	  	},
-	  	btnLoadOff () {
-
-	  	},
 	  	searchBtn () {
 	  		this.loadOn.searchLoad = true
 	  		this._getMsgList()
@@ -250,7 +244,7 @@
         this.loadOn.addLoading = false
         this.loadOn.searchLoad = false
         this.loadOn.resetLoad = false
-        this.loadOn.refreshLoa =  false
+        this.loadOn.refreshLoa = false
 	  	},
 	  	sortChange (val) {
 	  		if (val.prop !== null && val.order !== null) {

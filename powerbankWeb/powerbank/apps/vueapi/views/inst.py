@@ -65,10 +65,11 @@ def instList(request):
 		code = 1
 		if params['tip'] == 'instList':
 			status_id_list = status_user.objects.filter(user_id = user.id).values_list('status_id')
+			msg = ''
 			if status_module.objects.filter(status_id__in = status_id_list, module_id = 3).exists():
 				msg = getData(user, params['optFilters'], params['pageSize'], params['currentPage'], params['sortName'], params['orderType'])
 				code = 0
-	return HttpResponse(json.dumps({'data': {'msg': msg}, 'code': code}))
+			return HttpResponse(json.dumps({'data': {'msg': msg}, 'code': code}))
 
 @login_required
 @csrf_exempt
@@ -79,11 +80,11 @@ def instAdd(request):
 		code = 1
 		if params['tip'] == 'instAdd':
 			status_id_list = status_user.objects.filter(user_id = user.id).values_list('status_id')
-			if status_module.objects.filter(status_id__in = status_id_list, module_id = 3).exists():
+			if status_module.objects.filter(status_id__in = status_id_list, module_id = 4).exists():
 				p_pipe_id = params['pipe'][-1]
 				u_id = institutions.objects.get(id=user.inst_id).pipe_id
 
-				if u_id in p_pipe_id and p_pipe_id != u_id:
+				if u_id in p_pipe_id:
 					p_id = institutions.objects.get(pipe_id=p_pipe_id).id
 
 					if institutions.objects.filter(parent_id=p_id).exists():
