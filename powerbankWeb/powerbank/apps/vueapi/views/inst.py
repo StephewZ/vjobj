@@ -113,15 +113,53 @@ def instDel(request):
 			status_id_list = status_user.objects.filter(user_id = user.id).values_list('status_id')
 			if status_module.objects.filter(status_id__in = status_id_list, module_id = 3).exists():
 				code = 0
+				i = 0
+				j = 0
 				for d in params['delList']:
-					if institutions.objects.get(pipe_id=d['pipe_id']).is_leaf == False:
-						code =2
+					if institutions.objects.filter(pipe_id=d['pipe_id']).exists() == False:
+						code = 2
+						i = i + 1
+					elif institutions.objects.get(pipe_id=d['pipe_id']).is_leaf == False or institutions.objects.filter(pipe_id=d['pipe_id'][:-3] + get0(str(int(d['pipe_id'].split('.')[-1]) + 1))).exists():
+						code = 2
+						i = i + 1
 					else:
-						bro_inst = institutions.objects.filter(pipe_id__gt = d['pipe_id'], pipe_id__in = (d['pipe_id'], d['pipe_id'][:-3] + '999'))
-						print(bro_inst)
-						if len(bro_inst) != 0:
-							institutions.objects.filter(pipe_id=d['pipe_id']).delete()
-							bro_inst.update(pipe_id = F('pipe_id')[:-3] + get0(str(int(F('pipe_id').split('.')[-1]) + 1)))
-						else:
-							institutions.objects.filter(pipe_id=d['pipe_id']).delete()
-						return HttpResponse(json.dumps({'data': {'msg': 'ok'}, 'code': code}))
+						j = j + 1
+						institutions.objects.filter(pipe_id=d['pipe_id']).delete()
+						if institutions.objects.filter(pipe_id__startswith = d['pipe_id'][:-3]).exists() == False:
+							institutions.objects.filter(pipe_id=d["pipe_id"][:-4]).update(is_leaf=True)
+				return HttpResponse(json.dumps({'data': {'err': i, 'err_ok': j}, 'code': code}))
+
+@login_required
+@csrf_exempt
+def instEdit(request):
+	if request.method == "POST":
+		user = request.user
+		params = json.loads(request.body.decode())['params']['tips']
+		code = 1
+		if params['tip'] == 'instEdit':
+			status_id_list = status_user.objects.filter(user_id = user.id).values_list('status_id')
+			if status_module.objects.filter(status_id__in = status_id_list, module_id = 3).exists():
+				p_pipe_id = params['pipe'][-1]
+				pipe_id = params['pipe_id']
+				code = 0
+				if pipe_id[:-4] == p_pipe_id:
+					pp = institutions.objects.get(pipe_id=pipe_id)
+					if params['remark'] != pp.remark or params['name'] != pp.name:
+						institutions.objects.filter(pipe_id=pipe_id).update(name=params['name'], remark=params['remark'])
+					else:
+						code = 4	
+				elif institutions.objects.filter(pipe_id=pipe_id, is_leaf= True).exists() and institutions.objects.filter(pipe_id=pipe_id[:-3] + get0(str(int(pipe_id.split('.')[-1]) + 1))).exists() == False:
+					if pipe_id != p_pipe_id:
+						institutions.objects.filter(pipe_id=p_pipe_id).update(is_leaf=False)
+						p_inst = institutions.objects.get(pipe_id=p_pipe_id)
+						new_pipe_id = institutions.objects.filter(parent_id=p_inst.id).order_by('-pipe_id')[0].pipe_id
+						new_pipe_id = new_pipe_id[:-3] + get0(str(int(new_pipe_id.split('.')[-1]) + 1))
+						institutions.objects.filter(pipe_id=pipe_id).update(name=params['name'], remark=params['remark'],parent_id=p_inst.id,pipe_id=new_pipe_id)
+						if institutions.objects.filter(pipe_id__startswith = pipe_id[:-3]).exists() == False:
+							institutions.objects.filter(pipe_id=pipe_id[:-4]).update(is_leaf=True)
+					else:
+						code = 3
+				else:
+					code = 2
+			return HttpResponse(json.dumps({'data': {'msg': 'ok'}, 'code': code}))		
+				

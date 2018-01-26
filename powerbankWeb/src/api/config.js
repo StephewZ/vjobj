@@ -42,6 +42,12 @@ export const urls = {
 			tips: {
 				'tip': 'instDel'
 			}
+		},
+		instEdit: {
+			url: '/instEdit/',
+			tips: {
+				'tip': 'instEdit'
+			}
 		}
 	}
 }

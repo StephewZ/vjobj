@@ -16,4 +16,5 @@ urlpatterns = [
 	url(r'^instList/$', inst.instList, name="instList"),
 	url(r'^instAdd/$', inst.instAdd, name="instAdd"),
 	url(r'^instDel/$', inst.instDel, name="instDel"),
+	url(r'^instEdit/$', inst.instEdit, name="instEdit"),
 	]

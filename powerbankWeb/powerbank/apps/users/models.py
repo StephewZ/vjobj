@@ -14,6 +14,7 @@ class users(AbstractUser):
 	address = models.CharField(max_length=100, default='')
 	is_delete = models.BooleanField(default=False)
 	user_type = models.IntegerField(default=0)
+	edit_time = models.DateTimeField(default=datetime.now)
 	remark = models.CharField(max_length=255, default='')
 	class Meta:
 		db_table='users'
@@ -43,6 +44,8 @@ class accounts(models.Model):
 	alipay_rate = models.IntegerField(default=100)
 	hotline = models.CharField(max_length=64, null=True, blank=True)
 	qrcode = models.CharField(max_length=256, null=True, blank=True)
+	create_time = models.DateTimeField(default=datetime.now)
+	edit_time = models.DateTimeField(default=datetime.now)
 	remark = models.CharField(max_length=255, default='') #备注
 
 	class Meta:
@@ -52,7 +55,7 @@ class institutions(models.Model): #机构表
 	pipe_id = models.CharField(max_length=255,default = '') #管道id
 	parent_id = models.IntegerField(null=True, blank=True) #父节点id
 	is_leaf = models.BooleanField(default=True) #节点末端判断
-	inst_type = models.CharField(max_length=255,default = '') #机构类型
+	inst_type = models.CharField(max_length=255,default = 1) #机构类型
 	name = models.CharField(max_length=50, default='') #机构名称
 	creator = models.IntegerField(null=True, blank=True) #创建用户id user_id
 	create_time = models.DateTimeField(default=datetime.now)
@@ -69,6 +72,7 @@ class status(models.Model): #角色表
 	is_enabled = models.BooleanField(default=True) #是否启用
 	creator = models.IntegerField(null=True, blank=True) #创建用户id user_id
 	create_time = models.DateTimeField(default=datetime.now)
+	edit_time = models.DateTimeField(default=datetime.now)
 	remark = models.CharField(max_length=255, default='')
 
 	class Meta:
@@ -114,6 +118,7 @@ class devices(models.Model):
 	user_id = models.IntegerField(null=True, blank=True)
 	creator = models.IntegerField(default=1)
 	create_time = models.DateTimeField(default=datetime.now)
+	edit_time = models.DateTimeField(default=datetime.now)
 	remark = models.CharField(max_length=255, default='') #备注
 
 	class Meta:
@@ -125,6 +130,7 @@ class operation_note(models.Model):
 	operate_type = models.CharField(max_length=2048, default='')
 	old_data = models.CharField(max_length=2048, default='')
 	new_data = models.CharField(max_length=2048, default='')
+	create_time = models.DateTimeField(default=datetime.now)
 	remark = models.CharField(max_length=2048, default='') #备注
 
 	class Meta:

@@ -27,7 +27,7 @@ export function formatList (options) {
 }
 
 export function comparePipe (prop) {
-	return ((a, b) => {
+	return (a, b) => {
 		let v1 = a[prop]
 		let v2 = b[prop]
 		if (v1.length === v2.length) {
@@ -43,5 +43,14 @@ export function comparePipe (prop) {
 		} else {
 			return -1
 		}
-	})
+	}
+}
+
+export function msgNotice (msg, type, html, close, that) {
+	that.$message({
+		message: msg,
+		type: type,
+		dangerouslyUseHTMLString: html,
+    showClose: close
+  })
 }

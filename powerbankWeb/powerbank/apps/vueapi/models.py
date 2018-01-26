@@ -9,6 +9,7 @@ class device_inst(models.Model):
 	device_id = models.IntegerField(null=True, blank=True)
 	inst_id = models.IntegerField(null=True, blank=True)
 	auth_type = models.IntegerField(default=1)
+	create_time = models.DateTimeField(default=datetime.now)
 	remark = models.CharField(max_length=255, default='') #备注
 
 	class Meta:
