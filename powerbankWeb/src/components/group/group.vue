@@ -153,7 +153,7 @@
 	  name: 'group',
 	  data () {
 	  	return {
-	  		crumbMsg: ['产品管理', '机构管理'],
+	  		crumbMsg: ['管理员管理', '机构管理'],
 	  		filters: {
 	  			'optFilters': [],
 	  			'pageSize': 10,

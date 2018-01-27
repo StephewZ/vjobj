@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from django.conf.urls import url
-from .views import main, inst
+from .views import main, inst, user
 from users.views import user_login, get_userinfo, logout_view
 from django.views.generic import TemplateView
 
@@ -17,4 +17,8 @@ urlpatterns = [
 	url(r'^instAdd/$', inst.instAdd, name="instAdd"),
 	url(r'^instDel/$', inst.instDel, name="instDel"),
 	url(r'^instEdit/$', inst.instEdit, name="instEdit"),
+	url(r'^userList/$', user.userList, name="userList"),
+	url(r'^userAdd/$', user.userAdd, name="userAdd"),
+	url(r'^userDel/$', user.userDel, name="userDel"),
+	url(r'^userEdit/$', user.userEdit, name="userEdit"),
 	]

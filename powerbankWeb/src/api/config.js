@@ -49,5 +49,37 @@ export const urls = {
 				'tip': 'instEdit'
 			}
 		}
+	},
+	user: {
+		userList: {
+			url: '/userList/',
+			tips: {
+				'tip': 'userList'
+			}
+		},
+		userIndex: {
+			url: '/index/',
+			tips: {
+				'tip': 'userIndex'
+			}
+		},
+		userAdd: {
+			url: '/userAdd/',
+			tips: {
+				'tip': 'userAdd'
+			}
+		},
+		userDel: {
+			url: '/userDel/',
+			tips: {
+				'tip': 'userDel'
+			}
+		},
+		userEdit: {
+			url: '/userEdit/',
+			tips: {
+				'tip': 'userEdit'
+			}
+		}
 	}
 }

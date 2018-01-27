@@ -143,6 +143,7 @@ def instEdit(request):
 				p_pipe_id = params['pipe'][-1]
 				pipe_id = params['pipe_id']
 				code = 0
+				now = datetime.now
 				if pipe_id[:-4] == p_pipe_id:
 					pp = institutions.objects.get(pipe_id=pipe_id)
 					if params['remark'] != pp.remark or params['name'] != pp.name:
@@ -153,8 +154,11 @@ def instEdit(request):
 					if pipe_id != p_pipe_id:
 						institutions.objects.filter(pipe_id=p_pipe_id).update(is_leaf=False)
 						p_inst = institutions.objects.get(pipe_id=p_pipe_id)
-						new_pipe_id = institutions.objects.filter(parent_id=p_inst.id).order_by('-pipe_id')[0].pipe_id
-						new_pipe_id = new_pipe_id[:-3] + get0(str(int(new_pipe_id.split('.')[-1]) + 1))
+						if institutions.objects.filter(parent_id=p_inst.id).exists():
+							new_pipe_id = institutions.objects.filter(parent_id=p_inst.id).order_by('-pipe_id')[0].pipe_id
+							new_pipe_id = new_pipe_id[:-3] + get0(str(int(new_pipe_id.split('.')[-1]) + 1))
+						else:
+							new_pipe_id = p_pipe_id + '.001'
 						institutions.objects.filter(pipe_id=pipe_id).update(name=params['name'], remark=params['remark'],parent_id=p_inst.id,pipe_id=new_pipe_id)
 						if institutions.objects.filter(pipe_id__startswith = pipe_id[:-3]).exists() == False:
 							institutions.objects.filter(pipe_id=pipe_id[:-4]).update(is_leaf=True)
