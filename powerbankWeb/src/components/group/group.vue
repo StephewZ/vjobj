@@ -290,8 +290,6 @@
 	          }
 	          msgNotice(msg, type, false, true, this)
 	        })
-        }).catch(() => {
-        	msgNotice('发生错误，请刷新页面重试！', 'error', false, false, this)
         })
       },
       handleDels () {
@@ -322,8 +320,6 @@
 	          }
 	          msgNotice(msg, type, true, true, this)
 	        })
-        }).catch(() => {
-        	msgNotice('发生错误，请刷新页面重试！', 'error', false, false, this)
         })
 			},
 			handleAdd () {

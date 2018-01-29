@@ -53,17 +53,25 @@
 			</el-table-column>
 			<el-table-column type="index">
 			</el-table-column>
-			<el-table-column prop="username" label="昵称">
+			<el-table-column
+	      label="信息">
+	      <template slot-scope="scope">
+	        <el-popover trigger="hover" placement="top">
+	          <p>昵称: {{ scope.row.nickname }}</p>
+	          <p>电话: {{ scope.row.phone }}</p>
+	          <p>地址: {{ scope.row.address }}</p>
+	          <p>描述: {{ scope.row.remark }}</p>
+	          <div slot="reference" class="name-wrapper">
+	            <el-tag size="medium">{{ scope.row.nickname }}</el-tag>
+	          </div>
+	        </el-popover>
+	      </template>
+	    </el-table-column>
+			<el-table-column prop="username" label="账号">
 			</el-table-column>
-			<el-table-column prop="nickname" label="账号">
+			<el-table-column prop="inst_name" label="所属机构">
 			</el-table-column>
-			<el-table-column prop="creator" label="创建者">
-			</el-table-column>
-			<el-table-column prop="phone" label="电话">
-			</el-table-column>
-			<el-table-column prop="address" label="地址" sortable="custom">
-			</el-table-column>
-			<el-table-column prop="remark" label="描述" sortable="custom">
+			<el-table-column prop="creator" label="创建用户">
 			</el-table-column>
 			<el-table-column prop="last_login" label="最近登录" sortable="custom">
 			</el-table-column>
@@ -89,12 +97,39 @@
 	  </div>
 
 	  <!--添加界面-->
-		<el-dialog title="添加机构" :visible.sync="loadOn.addFormVisible" :close-on-click-modal="true">
-			<el-form :model="addForm" label-width="80px" :rules="FormRules">
-				<el-form-item label="机构名称" prop="name">
-					<el-input  v-model="addForm.name" auto-complete="off" maxlength="25" minlength="1"></el-input>
+		<el-dialog title="添加账号" :visible.sync="loadOn.addFormVisible" :close-on-click-modal="true">
+			<el-form :model="addForm" label-width="80px" ref="addForm" :rules="FormRules">
+				<el-form-item label="昵称" prop="nickname">
+					<el-input v-model="addForm.nickname" maxlength="50" auto-complete="off"></el-input>
 				</el-form-item>
-				<el-form-item label="上级机构" prop="parent">
+				<el-form-item label="用户名" prop="username">
+					<el-input
+					  v-model="addForm.username">
+					</el-input>
+				</el-form-item>
+				<el-form-item label="密码" prop="pass">
+			    <el-input type="password" maxlength="15" v-model="addForm.pass" auto-complete="off"></el-input>
+			  </el-form-item>
+			  <el-form-item label="确认密码" prop="checkPass">
+			    <el-input type="password" maxlength="15" v-model="addForm.checkPass" auto-complete="off"></el-input>
+			  </el-form-item>
+				<el-form-item label="电话" prop="phone">
+					<el-input
+						placeholder="联系电话"
+						maxlength="20"
+					  v-model="addForm.phone">
+					</el-input>
+				</el-form-item>
+				<el-form-item label="联系地址" prop="address">
+					<el-input
+					  type="textarea"
+					  :rows="2"
+					  maxlength="100"
+					  v-model="addForm.address"
+					  placeholder="联系地址">
+					</el-input>
+				</el-form-item>
+				<el-form-item label="所属机构" prop="pipe">
 					<el-cascader
 				    placeholder="请选择机构"
 				    :options="options"
@@ -103,7 +138,7 @@
 				    change-on-select
 				  ></el-cascader>
 				</el-form-item>
-				<el-form-item label="机构描述" prop="remark">
+				<el-form-item label="描述" prop="remark">
 					<el-input
 					  type="textarea"
 					  :rows="2"
@@ -115,17 +150,39 @@
 			</el-form>
 			<div slot="footer" class="dialog-footer">
 				<el-button @click="loadOn.addFormVisible = false" size="small">取消</el-button>
-				<el-button type="primary" @click="addSubmit" :loading="loadOn.addLoading" size="small">提交</el-button>
+				<el-button type="primary" @click="addSubmit('addForm')" :loading="loadOn.addLoading" size="small">提交</el-button>
 			</div>
 		</el-dialog>
 
 	  <!--编辑界面-->
-		<el-dialog title="机构编辑" :visible.sync="loadOn.editFormVisible" :close-on-click-modal="true">
+		<el-dialog title="账号设置" :visible.sync="loadOn.editFormVisible" :close-on-click-modal="true">
 			<el-form :model="editForm" label-width="80px" :rules="FormRules" ref="editForm">
-				<el-form-item label="机构名称" prop="name">
-					<el-input v-model="editForm.name" auto-complete="off"></el-input>
+				<el-form-item label="昵称" prop="nickname">
+					<el-input v-model="editForm.nickname" maxlength="50" auto-complete="off"></el-input>
 				</el-form-item>
-				<el-form-item label="上级机构" prop="parent">
+				<el-form-item label="用户名" prop="username">
+					<el-input
+					  v-model="editForm.username"
+					  :disabled="true">
+					</el-input>
+				</el-form-item>
+				<el-form-item label="电话" prop="phone">
+					<el-input
+						placeholder="联系电话"
+						maxlength="20"
+					  v-model="editForm.phone">
+					</el-input>
+				</el-form-item>
+				<el-form-item label="联系地址" prop="address">
+					<el-input
+					  type="textarea"
+					  :rows="2"
+					  maxlength="100"
+					  v-model="editForm.address"
+					  placeholder="联系地址">
+					</el-input>
+				</el-form-item>
+				<el-form-item label="所属机构" prop="pipe">
 					<el-cascader
 				    placeholder="请选择机构"
 				    :options="options"
@@ -134,13 +191,13 @@
 				    change-on-select
 				  ></el-cascader>
 				</el-form-item>
-				<el-form-item label="机构描述" prop="remark">
+				<el-form-item label="描述" prop="remark">
 					<el-input
 					  type="textarea"
 					  :rows="2"
 					  maxlength="100"
 					  v-model="editForm.remark"
-					  placeholder="机构描述">
+					  placeholder="描述">
 					</el-input>
 				</el-form-item>
 			</el-form>
@@ -161,6 +218,27 @@
 	export default {
 	  name: 'group',
 	  data () {
+	  	let validatePass = (rule, value, callback) => {
+        if (value === '') {
+          callback(new Error('请输入密码'))
+        } else if (value.length < 6) {
+        	callback(new Error('密码长度至少为6位'))
+        } else {
+          if (this.addForm.checkPass !== '') {
+            this.$refs.addForm.validateField('checkPass')
+          }
+          callback()
+        }
+      }
+      let validatePass2 = (rule, value, callback) => {
+        if (value === '') {
+          callback(new Error('请再次输入密码'))
+        } else if (value !== this.addForm.pass) {
+          callback(new Error('两次输入密码不一致!'))
+        } else {
+          callback()
+        }
+      }
 	  	return {
 	  		crumbMsg: ['管理员管理', '用户管理'],
 	  		filters: {
@@ -186,17 +264,36 @@
 	  		delList: [],
 	  		options: [],
         FormRules: {
-					name: [
-						{ required: true, message: '请输入用户名称', trigger: 'blur' }
+					nickname: [
+						{ required: true, message: '请输入用户昵称', trigger: 'blur' },
+						{ min: 2, max: 25, message: '长度在 2 到 25 个字符', trigger: 'blur' }
 					],
-					parent: [
+					username: [
+						{ required: true, message: '请输入用户名', trigger: 'blur' },
+						{ min: 4, max: 15, message: '长度在 4 到 15 个字符', trigger: 'blur' }
+					],
+					pass: [
+            { required: true, validator: validatePass, trigger: 'blur' }
+          ],
+          checkPass: [
+            { required: true, validator: validatePass2, trigger: 'blur' }
+          ],
+					pipe: [
 						{ required: true, message: '请选择用户所属机构', trigger: 'change' }
+					],
+					phone: [
+						{ max: 20, message: '最长为20个字符', trigger: 'blur' }
 					]
 				},
 				editForm: {},
 				addForm: {
-					name: '',
+					nickname: '',
+					username: '',
 					pipe: [],
+					pass: '',
+					checkPass: '',
+					phone: '',
+					address: '',
 					remark: ''
 				}
 	  	}
@@ -208,7 +305,7 @@
 	  methods: {
 	  	_getIndex (tip, url) {
 	  		tip = urls.user.userIndex.tips
-	  		url = urls.useruserIndex.url
+	  		url = urls.user.userIndex.url
 	  		getData(tip, url).then((res) => {
           if (res.code === ERR_OK) {
             this.options = formatList(res.data.options)
@@ -226,6 +323,7 @@
             this.msgList = res.data.msg.data
             this.total = res.data.msg.total
           }
+          console.log(this.msgList)
           this.loadOn.tableLoading = false
           this.loadOn.resetLoad = false
           this.loadOn.searchLoad = false
@@ -300,8 +398,6 @@
 	          }
 	          msgNotice(msg, type, false, true, this)
 	        })
-        }).catch(() => {
-        	msgNotice('发生错误，请刷新页面重试！', 'error', false, false, this)
         })
       },
       handleDels () {
@@ -332,34 +428,34 @@
 	          }
 	          msgNotice(msg, type, true, true, this)
 	        })
-        }).catch(() => {
-        	msgNotice('发生错误，请刷新页面重试！', 'error', false, false, this)
         })
 			},
 			handleAdd () {
 				this.loadOn.addFormVisible = true
 			},
-			addSubmit () {
-				if (this.addForm !== '' && this.addForm.pipe.length !== 0) {
-					this.loadOn.addLoading = true
-					let tip = urls.user.userAdd.tips
-					let url = urls.user.userAdd.url
-					const data = Object.assign({}, tip, this.addForm)
-					sendData(data, url).then((res) => {
+			addSubmit (formName) {
+				this.$refs[formName].validate((valid) => {
+          if (valid) {
+            this.loadOn.addLoading = true
+            let tip = urls.user.userAdd.tips
+            let url = urls.user.userAdd.url
+            const data = Object.assign({}, tip, this.addForm)
+            sendData(data, url).then((res) => {
 	          if (res.code === ERR_OK) {
-			        msgNotice('添加成功！', 'success', false, true, this)
-	          	this._getMsgList()
-	  					this._getIndex()
-	          }
-	          this.loadOn.addLoading = false
-	        }).catch(() => {
-	        	this.loadOn.addLoading = false
-	        	msgNotice('发生错误，请刷新页面重试！', 'error', false, false, this)
-	        })
-				} else {
-					msgNotice('带<span style="color: red"> * </span>号的选项不能为空！', 'warning', true, true, this)
-					return false
-				}
+				        msgNotice('添加成功！', 'success', false, true, this)
+		          	this._getMsgList()
+		  					this._getIndex()
+		          }
+		          this.loadOn.addLoading = false
+		        }).catch(() => {
+		        	this.loadOn.addLoading = false
+		        	msgNotice('发生错误，请刷新页面重试！', 'error', false, false, this)
+		        })
+					} else {
+            msgNotice('请按照规则填写带<span style="color: red"> * </span>号的选项与选填选项！', 'warning', true, true, this)
+            return false
+          }
+        })
 			},
 			handleEdit (row) {
 				this.loadOn.editFormVisible = true

@@ -10,6 +10,7 @@ from django.contrib.auth.models import AbstractUser
 class users(AbstractUser):
 	inst_id = models.IntegerField(default=0) #所属机构id
 	nickname = models.CharField(max_length=50, default='')
+	creator = models.IntegerField(default=0)
 	phone = models.CharField(max_length=16, null=True, blank=True)
 	address = models.CharField(max_length=100, default='')
 	is_delete = models.BooleanField(default=False)

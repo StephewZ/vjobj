@@ -29,7 +29,7 @@ def getData(user, opF, pS, cP, sN, oT):
 			data = data.order_by('edit_time')
 		elif oT == 'descending':
 			data = data.order_by('-edit_time')
-	total = len(data)
+	total = data.count()
 	data = data[(pS*cP-pS):pS*cP]
 
 	ndata = []
@@ -65,10 +65,12 @@ def instList(request):
 		code = 1
 		if params['tip'] == 'instList':
 			status_id_list = status_user.objects.filter(user_id = user.id).values_list('status_id')
-			msg = ''
 			if status_module.objects.filter(status_id__in = status_id_list, module_id = 3).exists():
 				msg = getData(user, params['optFilters'], params['pageSize'], params['currentPage'], params['sortName'], params['orderType'])
 				code = 0
+			else:
+				msg = 'denied'
+				code = 404
 			return HttpResponse(json.dumps({'data': {'msg': msg}, 'code': code}))
 
 @login_required
@@ -97,6 +99,9 @@ def instAdd(request):
 						newp_id = p_pipe_id + '.001'
 						institutions.objects.create(name=params['name'], remark=params['remark'], parent_id=p_id, is_leaf=True, pipe_id=newp_id, creator= user.id)
 					code = 0
+			else:
+				msg = 'denied'
+				code = 404		
 		return HttpResponse(json.dumps({'data': {'msg': 'ok'}, 'code': code}))
 
 def delRule(pipe):
@@ -112,7 +117,7 @@ def instDel(request):
 		code = 1
 		if params['tip'] == 'instDel':
 			status_id_list = status_user.objects.filter(user_id = user.id).values_list('status_id')
-			if status_module.objects.filter(status_id__in = status_id_list, module_id = 3).exists():
+			if status_module.objects.filter(status_id__in = status_id_list, module_id = 5).exists():
 				code = 0
 				i = 0
 				j = 0
@@ -128,7 +133,10 @@ def instDel(request):
 						institutions.objects.filter(pipe_id=d['pipe_id']).delete()
 						if institutions.objects.filter(pipe_id__startswith = d['pipe_id'][:-3]).exists() == False:
 							institutions.objects.filter(pipe_id=d["pipe_id"][:-4]).update(is_leaf=True)
-				return HttpResponse(json.dumps({'data': {'err': i, 'err_ok': j}, 'code': code}))
+			else:
+				msg = 'denied'
+				code = 404				
+			return HttpResponse(json.dumps({'data': {'err': i, 'err_ok': j}, 'code': code}))
 
 @login_required
 @csrf_exempt
@@ -147,7 +155,7 @@ def instEdit(request):
 				if pipe_id[:-4] == p_pipe_id:
 					pp = institutions.objects.get(pipe_id=pipe_id)
 					if params['remark'] != pp.remark or params['name'] != pp.name:
-						institutions.objects.filter(pipe_id=pipe_id).update(name=params['name'], remark=params['remark'])
+						institutions.objects.filter(pipe_id=pipe_id).update(name=params['name'], remark=params['remark'], edit_time = now)
 					else:
 						code = 4	
 				elif institutions.objects.filter(pipe_id=pipe_id, is_leaf= True).exists() and institutions.objects.filter(pipe_id=pipe_id[:-3] + get0(str(int(pipe_id.split('.')[-1]) + 1))).exists() == False:
@@ -166,5 +174,8 @@ def instEdit(request):
 						code = 3
 				else:
 					code = 2
+			else:
+				msg = 'denied'
+				code = 404		
 			return HttpResponse(json.dumps({'data': {'msg': 'ok'}, 'code': code}))		
 				
