@@ -104,10 +104,6 @@ def instAdd(request):
 				code = 404		
 		return HttpResponse(json.dumps({'data': {'msg': 'ok'}, 'code': code}))
 
-def delRule(pipe):
-
-	return
-
 @login_required
 @csrf_exempt
 def instDel(request):

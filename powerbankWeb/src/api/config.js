@@ -81,5 +81,37 @@ export const urls = {
 				'tip': 'userEdit'
 			}
 		}
+	},
+	status: {
+		statusList: {
+			url: '/statusList/',
+			tips: {
+				'tip': 'statusList'
+			}
+		},
+		statusIndex: {
+			url: '/index/',
+			tips: {
+				'tip': 'statusIndex'
+			}
+		},
+		statusAdd: {
+			url: '/statusAdd/',
+			tips: {
+				'tip': 'statusAdd'
+			}
+		},
+		statusDel: {
+			url: '/statusDel/',
+			tips: {
+				'tip': 'statusDel'
+			}
+		},
+		statusEdit: {
+			url: '/statusEdit/',
+			tips: {
+				'tip': 'statusEdit'
+			}
+		}
 	}
 }

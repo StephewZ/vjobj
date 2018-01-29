@@ -21,4 +21,8 @@ urlpatterns = [
 	url(r'^userAdd/$', user.userAdd, name="userAdd"),
 	url(r'^userDel/$', user.userDel, name="userDel"),
 	url(r'^userEdit/$', user.userEdit, name="userEdit"),
+	url(r'^statusList/$', status.statusList, name="statusList"),
+	url(r'^statusAdd/$', status.statusAdd, name="statusAdd"),
+	url(r'^statusDel/$', status.statusDel, name="statusDel"),
+	url(r'^statusEdit/$', status.statusEdit, name="statusEdit"),
 	]

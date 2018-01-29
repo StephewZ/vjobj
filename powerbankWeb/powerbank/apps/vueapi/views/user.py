@@ -68,16 +68,17 @@ def userList(request):
 			if status_module.objects.filter(status_id__in = status_id_list, module_id = 7).exists():
 				code = 0
 				msg = getData(user, params['optFilters'], params['pageSize'], params['currentPage'], params['sortName'], params['orderType'], params['mixing'])
+			else:
+				msg = 'denied'
+				code = 404
 			return HttpResponse(json.dumps({'data': {'msg': msg}, 'code': code}))
 
 @login_required
 @csrf_exempt
 def userAdd(request):
 	user = request.user
-	code = 1
 	msg = ''
 	params = json.loads(request.body.decode())['params']['tips']
-	code = 1
 	if params['tip'] == 'userAdd':
 		status_id_list = status_user.objects.filter(user_id = user.id).values_list('status_id')
 		if status_module.objects.filter(status_id__in = status_id_list, module_id = 8).exists():
@@ -125,13 +126,25 @@ def userAdd(request):
 			else:
 				code = 2
 				err = '发生未知错误，请刷新页面重试！'
-			return HttpResponse(json.dumps({'data': {'msg': msg}, 'code': code, 'err': err}))
+		else:
+			msg = 'denied'
+			code = 404
+		return HttpResponse(json.dumps({'data': {'msg': msg}, 'code': code, 'err': err}))
 
 @login_required
 @csrf_exempt
 def userDel(request):
-	code = 1
+	user = request.user
 	msg = ''
+	params = json.loads(request.body.decode())['params']['tips']
+	if params['tip'] == 'userDel':
+		status_id_list = status_user.objects.filter(user_id = user.id).values_list('status_id')
+		if status_module.objects.filter(status_id__in = status_id_list, module_id = 9).exists():
+			code = 0
+			err = ''
+	else:
+		msg = 'denied'
+		code = 404
 	return HttpResponse(json.dumps({'data': {'msg': msg}, 'code': code}))
 
 @login_required
