@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 
 from django.conf.urls import url
-from .views import main, inst, user
+from .views import main, inst, user, status
+from .pay import wxpay
 from users.views import user_login, get_userinfo, logout_view
 from django.views.generic import TemplateView
 
@@ -25,4 +26,5 @@ urlpatterns = [
 	url(r'^statusAdd/$', status.statusAdd, name="statusAdd"),
 	url(r'^statusDel/$', status.statusDel, name="statusDel"),
 	url(r'^statusEdit/$', status.statusEdit, name="statusEdit"),
+	url(r'^paydetail', wxpay.paydetail, name="paydetail"),
 	]

@@ -15,13 +15,6 @@
 				  ></el-cascader>
 				</el-form-item>
 				<el-form-item>
-					<el-input
-					  placeholder="请输入查找内容"
-					  v-model="filters.mixing"
-					  clearable>
-					</el-input>
-				</el-form-item>
-				<el-form-item>
 					<el-button type="primary" size="mini" v-on:click="searchBtn" icon="el-icon-search" :loading="loadOn.searchLoad" :disabled="this.loadOn.tableLoading">查询</el-button>
 				</el-form-item>
 				<el-form-item>
@@ -51,29 +44,21 @@
 		<el-table :data="msgList" highlight-current-row v-loading="loadOn.tableLoading" @sort-change="sortChange" @selection-change="selectChange">
 			<el-table-column type="selection">
 			</el-table-column>
-			<el-table-column type="index">
+			<el-table-column type="index" prop="pipe_id">
 			</el-table-column>
-			<el-table-column
-	      label="信息">
-	      <template slot-scope="scope">
-	        <el-popover trigger="hover" placement="top">
-	          <p>昵称: {{ scope.row.nickname }}</p>
-	          <p>电话: {{ scope.row.phone }}</p>
-	          <p>地址: {{ scope.row.address }}</p>
-	          <p>描述: {{ scope.row.remark }}</p>
-	          <div slot="reference" class="name-wrapper">
-	            <el-tag size="medium">{{ scope.row.nickname }}</el-tag>
-	          </div>
-	        </el-popover>
-	      </template>
-	    </el-table-column>
-			<el-table-column prop="username" label="账号">
+			<el-table-column prop="name" label="角色名称">
 			</el-table-column>
-			<el-table-column prop="inst_name" label="所属机构">
+			<el-table-column prop="parent" label="所属机构">
+			</el-table-column>
+			<el-table-column prop="status" label="状态">
 			</el-table-column>
 			<el-table-column prop="creator" label="创建用户">
 			</el-table-column>
-			<el-table-column prop="last_login" label="最近登录" sortable="custom">
+			<el-table-column prop="remark" label="描述">
+			</el-table-column>
+			<el-table-column prop="made_time" label="创建时间" sortable="custom">
+			</el-table-column>
+			<el-table-column prop="edit_time" label="最近编辑" sortable="custom">
 			</el-table-column>
 			<el-table-column label="操作">
 				<template slot-scope="scope">
@@ -97,39 +82,12 @@
 	  </div>
 
 	  <!--添加界面-->
-		<el-dialog title="添加账号" :visible.sync="loadOn.addFormVisible" :close-on-click-modal="true">
-			<el-form :model="addForm" label-width="80px" ref="addForm" :rules="FormRules">
-				<el-form-item label="昵称" prop="nickname">
-					<el-input v-model="addForm.nickname" maxlength="50" auto-complete="off"></el-input>
+		<el-dialog title="添加机构" :visible.sync="loadOn.addFormVisible" :close-on-click-modal="true">
+			<el-form :model="addForm" label-width="80px" :rules="FormRules">
+				<el-form-item label="机构名称" prop="name">
+					<el-input  v-model="addForm.name" auto-complete="off" maxlength="25" minlength="1"></el-input>
 				</el-form-item>
-				<el-form-item label="用户名" prop="username">
-					<el-input
-					  v-model="addForm.username">
-					</el-input>
-				</el-form-item>
-				<el-form-item label="密码" prop="pass">
-			    <el-input type="password" maxlength="15" v-model="addForm.pass" auto-complete="off"></el-input>
-			  </el-form-item>
-			  <el-form-item label="确认密码" prop="checkPass">
-			    <el-input type="password" maxlength="15" v-model="addForm.checkPass" auto-complete="off"></el-input>
-			  </el-form-item>
-				<el-form-item label="电话" prop="phone">
-					<el-input
-						placeholder="联系电话"
-						maxlength="20"
-					  v-model="addForm.phone">
-					</el-input>
-				</el-form-item>
-				<el-form-item label="联系地址" prop="address">
-					<el-input
-					  type="textarea"
-					  :rows="2"
-					  maxlength="100"
-					  v-model="addForm.address"
-					  placeholder="联系地址">
-					</el-input>
-				</el-form-item>
-				<el-form-item label="所属机构" prop="pipe">
+				<el-form-item label="上级机构" prop="pipe">
 					<el-cascader
 				    placeholder="请选择机构"
 				    :options="options"
@@ -138,7 +96,7 @@
 				    change-on-select
 				  ></el-cascader>
 				</el-form-item>
-				<el-form-item label="描述" prop="remark">
+				<el-form-item label="机构描述" prop="remark">
 					<el-input
 					  type="textarea"
 					  :rows="2"
@@ -150,39 +108,17 @@
 			</el-form>
 			<div slot="footer" class="dialog-footer">
 				<el-button @click="loadOn.addFormVisible = false" size="small">取消</el-button>
-				<el-button type="primary" @click="addSubmit('addForm')" :loading="loadOn.addLoading" size="small">提交</el-button>
+				<el-button type="primary" @click="addSubmit" :loading="loadOn.addLoading" size="small">提交</el-button>
 			</div>
 		</el-dialog>
 
 	  <!--编辑界面-->
-		<el-dialog title="账号设置" :visible.sync="loadOn.editFormVisible" :close-on-click-modal="true">
+		<el-dialog title="机构编辑" :visible.sync="loadOn.editFormVisible" :close-on-click-modal="true">
 			<el-form :model="editForm" label-width="80px" :rules="FormRules" ref="editForm">
-				<el-form-item label="昵称" prop="nickname">
-					<el-input v-model="editForm.nickname" maxlength="50" auto-complete="off"></el-input>
+				<el-form-item label="机构名称" prop="name">
+					<el-input v-model="editForm.name" auto-complete="off"></el-input>
 				</el-form-item>
-				<el-form-item label="用户名" prop="username">
-					<el-input
-					  v-model="editForm.username"
-					  :disabled="true">
-					</el-input>
-				</el-form-item>
-				<el-form-item label="电话" prop="phone">
-					<el-input
-						placeholder="联系电话"
-						maxlength="20"
-					  v-model="editForm.phone">
-					</el-input>
-				</el-form-item>
-				<el-form-item label="联系地址" prop="address">
-					<el-input
-					  type="textarea"
-					  :rows="2"
-					  maxlength="100"
-					  v-model="editForm.address"
-					  placeholder="联系地址">
-					</el-input>
-				</el-form-item>
-				<el-form-item label="所属机构" prop="pipe">
+				<el-form-item label="上级机构" prop="pipe">
 					<el-cascader
 				    placeholder="请选择机构"
 				    :options="options"
@@ -191,13 +127,13 @@
 				    change-on-select
 				  ></el-cascader>
 				</el-form-item>
-				<el-form-item label="描述" prop="remark">
+				<el-form-item label="机构描述" prop="remark">
 					<el-input
 					  type="textarea"
 					  :rows="2"
 					  maxlength="100"
 					  v-model="editForm.remark"
-					  placeholder="描述">
+					  placeholder="机构描述">
 					</el-input>
 				</el-form-item>
 			</el-form>
@@ -222,7 +158,6 @@
 	  		crumbMsg: ['管理员管理', '角色管理'],
 	  		filters: {
 	  			'optFilters': [],
-	  			'mixing': '',
 	  			'pageSize': 10,
 	  			'currentPage': 1,
 	  			'sortName': '',
@@ -243,30 +178,17 @@
 	  		delList: [],
 	  		options: [],
         FormRules: {
-					nickname: [
-						{ required: true, message: '请输入用户昵称', trigger: 'blur' },
-						{ min: 2, max: 25, message: '长度在 2 到 25 个字符', trigger: 'blur' }
-					],
-					username: [
-						{ required: true, message: '请输入用户名', trigger: 'blur' },
-						{ min: 4, max: 15, message: '长度在 4 到 15 个字符', trigger: 'blur' }
+					name: [
+						{ required: true, message: '请输入机构名称', trigger: 'blur' }
 					],
 					pipe: [
-						{ required: true, message: '请选择用户所属机构', trigger: 'change' }
-					],
-					phone: [
-						{ max: 20, message: '最长为20个字符', trigger: 'blur' }
+						{ required: true, message: '请选择上级机构', trigger: 'change' }
 					]
 				},
 				editForm: {},
 				addForm: {
-					nickname: '',
-					username: '',
+					name: '',
 					pipe: [],
-					pass: '',
-					checkPass: '',
-					phone: '',
-					address: '',
 					remark: ''
 				}
 	  	}
@@ -277,8 +199,8 @@
 	  },
 	  methods: {
 	  	_getIndex (tip, url) {
-	  		tip = urls.user.userIndex.tips
-	  		url = urls.user.userIndex.url
+	  		tip = urls.status.statusIndex.tips
+	  		url = urls.status.statusIndex.url
 	  		getData(tip, url).then((res) => {
           if (res.code === ERR_OK) {
             this.options = formatList(res.data.options)
@@ -287,8 +209,8 @@
 	  	},
 	  	_getMsgList (tip, url) {
 	  		this.loadOn.tableLoading = true
-	  		tip = urls.user.userList.tips
-	  		url = urls.user.userList.url
+	  		tip = urls.status.statusList.tips
+	  		url = urls.status.statusList.url
 	  		const data = Object.assign({}, tip, this.filters)
 
 	  		getData(data, url).then((res) => {
@@ -296,7 +218,6 @@
             this.msgList = res.data.msg.data
             this.total = res.data.msg.total
           }
-          console.log(this.msgList)
           this.loadOn.tableLoading = false
           this.loadOn.resetLoad = false
           this.loadOn.searchLoad = false
@@ -352,8 +273,8 @@
       },
       handleDel (row) {
 		  	this.$confirm(`确认删除机构：${row.name} ？`, '提示', {type: 'warning'}).then(() => {
-		  		let tip = urls.user.userDel.tips
-		  		let url = urls.user.userDel.url
+		  		let tip = urls.status.statusDel.tips
+		  		let url = urls.status.statusDel.url
 		  		const data = Object.assign({}, tip, {
 		  			'delList': [{'pipe_id': row.pipe_id}]
 		  		})
@@ -375,8 +296,8 @@
       },
       handleDels () {
       	this.$confirm('只有根节点最后一级机构才能删除，是否继续？', '提示', {type: 'warning'}).then(() => {
-		  		let tip = urls.user.userDel.tips
-		  		let url = urls.user.userDel.url
+		  		let tip = urls.status.statusDel.tips
+		  		let url = urls.status.statusDel.url
 		  		const data = Object.assign({}, tip, {
 		  			'delList': this.delList
 		  		})
@@ -406,29 +327,27 @@
 			handleAdd () {
 				this.loadOn.addFormVisible = true
 			},
-			addSubmit (formName) {
-				this.$refs[formName].validate((valid) => {
-          if (valid) {
-            this.loadOn.addLoading = true
-            let tip = urls.user.userAdd.tips
-            let url = urls.user.userAdd.url
-            const data = Object.assign({}, tip, this.addForm)
-            sendData(data, url).then((res) => {
+			addSubmit () {
+				if (this.addForm !== '' && this.addForm.pipe.length !== 0) {
+					this.loadOn.addLoading = true
+					let tip = urls.status.statusAdd.tips
+					let url = urls.status.statusAdd.url
+					const data = Object.assign({}, tip, this.addForm)
+					sendData(data, url).then((res) => {
 	          if (res.code === ERR_OK) {
-				        msgNotice('添加成功！', 'success', false, true, this)
-		          	this._getMsgList()
-		  					this._getIndex()
-		          }
-		          this.loadOn.addLoading = false
-		        }).catch(() => {
-		        	this.loadOn.addLoading = false
-		        	msgNotice('发生错误，请刷新页面重试！', 'error', false, false, this)
-		        })
-					} else {
-            msgNotice('请按照规则填写带<span style="color: red"> * </span>号的选项与选填选项！', 'warning', true, true, this)
-            return false
-          }
-        })
+			        msgNotice('添加成功！', 'success', false, true, this)
+	          	this._getMsgList()
+	  					this._getIndex()
+	          }
+	          this.loadOn.addLoading = false
+	        }).catch(() => {
+	        	this.loadOn.addLoading = false
+	        	msgNotice('发生错误，请刷新页面重试！', 'error', false, false, this)
+	        })
+				} else {
+					msgNotice('带<span style="color: red"> * </span>号的选项不能为空！', 'warning', true, true, this)
+					return false
+				}
 			},
 			handleEdit (row) {
 				this.loadOn.editFormVisible = true
@@ -442,8 +361,8 @@
 			editSubmit () {
 				if (this.editForm.name.length !== 0 && this.editForm.pipe.length !== 0) {
 					this.loadOn.editLoading = true
-					let tip = urls.user.userEdit.tips
-					let url = urls.user.userEdit.url
+					let tip = urls.status.statusEdit.tips
+					let url = urls.status.statusEdit.url
 					const data = Object.assign({}, tip, this.editForm)
 					sendData(data, url).then((res) => {
 						if (res.code === ERR_OK) {

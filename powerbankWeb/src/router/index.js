@@ -9,7 +9,14 @@ const Focus = (resolve) => {
   })
 }
 
+const Pay = (resolve) => {
+  import('components/pay/pay').then((module) => {
+    resolve(module)
+  })
+}
+
 export default new Router({
+  mode: 'history',
   routes: [
     {
       path: '/',
@@ -18,6 +25,10 @@ export default new Router({
     {
       path: '/focus',
       component: Focus
+    },
+    {
+      path: '/pay/:num',
+      component: Pay
     }
   ]
 })

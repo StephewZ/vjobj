@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+ <meta http-equiv="Content-type" content="text/html; charset = utf-8">
+ <title>pay</title>
+ <script type="text/javascript" charset = "utf-8">
+ </script>
+</head>
+<body>
+	<button id="pay" onclick="pay()">支付0.01</button>
+</body>
+</html>
+<script type="text/javascript">
+
+	function onBridgeReady(){  
+    WeixinJSBridge.invoke('getBrandWCPayRequest', {
+      "appId": "{{appid}}", // 公众号名称，由商户传入  
+      "timeStamp": "{{sign.timestamp}}", // 时间戳  
+      "nonceStr":"{{sign.nonceStr}}", // 随机串  
+      "package": "{{package}}", // 扩展包  
+      "signType": "MD5", // 微信签名方式:1.sha1  
+      "paySign":"{{paysign}}"// 微信签名  
+    }, function(res) {  
+      if (res.err_msg == "get_brand_wcpay_request:ok") {  
+        document.getElementById("myForm").submit();
+      } else {  
+        alert('错误：' + res.err_msg);
+      }  
+      alert(res.err_msg);  
+              
+    }); 
+	}
+
+	function pay(){
+
+		if (typeof WeixinJSBridge=="undefined") {
+		  if (document.addEventListener) {
+		    document.addEventListener('WeixinJSBridgeReady',onBridgeReady,false);  
+		  } else if (document.attachEvent) { 
+		    document.attachEvent('WeixinJSBridgeReady',onBridgeReady);  
+		    document.attachEvent('onWeixinJSBridgeReady',onBridgeReady);  
+		  }  
+		} else {
+		  onBridgeReady();  
+		} 
+	} 
+</script>

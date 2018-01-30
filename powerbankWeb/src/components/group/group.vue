@@ -85,7 +85,7 @@
 				<el-form-item label="机构名称" prop="name">
 					<el-input  v-model="addForm.name" auto-complete="off" maxlength="25" minlength="1"></el-input>
 				</el-form-item>
-				<el-form-item label="上级机构" prop="parent">
+				<el-form-item label="上级机构" prop="pipe">
 					<el-cascader
 				    placeholder="请选择机构"
 				    :options="options"
@@ -116,7 +116,7 @@
 				<el-form-item label="机构名称" prop="name">
 					<el-input v-model="editForm.name" auto-complete="off"></el-input>
 				</el-form-item>
-				<el-form-item label="上级机构" prop="parent">
+				<el-form-item label="上级机构" prop="pipe">
 					<el-cascader
 				    placeholder="请选择机构"
 				    :options="options"
@@ -179,7 +179,7 @@
 					name: [
 						{ required: true, message: '请输入机构名称', trigger: 'blur' }
 					],
-					parent: [
+					pipe: [
 						{ required: true, message: '请选择上级机构', trigger: 'change' }
 					]
 				},

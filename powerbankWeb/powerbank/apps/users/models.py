@@ -69,7 +69,7 @@ class institutions(models.Model): #机构表
 
 class status(models.Model): #角色表
 	name = models.CharField(max_length=28, default='')
-	status_type = models.IntegerField(null=True, blank=True) #角色类型
+	status_type = models.IntegerField(default=1) #角色类型
 	is_enabled = models.BooleanField(default=True) #是否启用
 	creator = models.IntegerField(null=True, blank=True) #创建用户id user_id
 	create_time = models.DateTimeField(default=datetime.now)

@@ -1,0 +1,2 @@
+webpackJsonp([2],{LqM4:function(e,n,t){"use strict";Object.defineProperty(n,"__esModule",{value:!0});var r={render:function(){var e=this.$createElement;return(this._self._c||e)("div",[this._v("主页")])},staticRenderFns:[]},s=t("VU/8")({name:"home",data:function(){return{}},components:{}},r,!1,null,null,null);n.default=s.exports}});
+//# sourceMappingURL=2.95a84126a1e2516b4e99.js.map

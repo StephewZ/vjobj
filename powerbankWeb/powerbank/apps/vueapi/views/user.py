@@ -51,7 +51,10 @@ def getData(user, opF, pS, cP, sN, oT, mX):
 		else:
 			obj['creator'] = ''	
 		obj['remark'] = d.remark
-		obj['last_login'] = datetime.strftime(d.last_login, "%Y-%m-%d %H:%M:%S")
+		if d.last_login != None:
+			obj['last_login'] = datetime.strftime(d.last_login, "%Y-%m-%d %H:%M:%S")
+		else:
+			obj['last_login'] = ''	
 		ndata.append(obj)
 	datas = {'total': total, 'data': ndata}
 	return datas

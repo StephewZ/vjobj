@@ -11,7 +11,7 @@ from datetime import datetime
 
 from users.models import users, institutions, status_user, status_module
 
-def getData(user, opF, pS, cP, sN, oT, mX):
+def getData(user, pS, cP, sN, oT, mX):
 	datas = ''
 	return datas
 
@@ -24,12 +24,13 @@ def statusList(request):
 		code = 1
 		if params['tip'] == 'statusList':
 			status_id_list = status_user.objects.filter(user_id = user.id).values_list('status_id')
-			if status_module.objects.filter(status_id__in = status_id_list, module_id = 7).exists():
+			if status_module.objects.filter(status_id__in = status_id_list, module_id = 11).exists():
 				code = 0
-		else:
-			msg = 'denied'
-			code = 404
-		return HttpResponse(json.dumps({'data': {'msg': msg}, 'code': code}))
+				msg = getData(user, params['pageSize'], params['currentPage'], params['sortName'], params['orderType'], params['mixing'])
+			else:
+				msg = 'denied'
+				code = 404
+			return HttpResponse(json.dumps({'data': {'msg': msg}, 'code': code}))
 
 @login_required
 @csrf_exempt
@@ -37,7 +38,7 @@ def statusAdd(request):
 	user = request.user
 	msg = ''
 	params = json.loads(request.body.decode())['params']['tips']
-	if params['tip'] == 'userAdd':
+	if params['tip'] == 'statusAdd':
 		status_id_list = status_user.objects.filter(user_id = user.id).values_list('status_id')
 		if status_module.objects.filter(status_id__in = status_id_list, module_id = 8).exists():
 			code = 0
@@ -58,10 +59,10 @@ def statusDel(request):
 		if status_module.objects.filter(status_id__in = status_id_list, module_id = 9).exists():
 			code = 0
 			err = ''
-	else:
-		msg = 'denied'
-		code = 404
-	return HttpResponse(json.dumps({'data': {'msg': msg}, 'code': code}))
+		else:
+			msg = 'denied'
+			code = 404
+		return HttpResponse(json.dumps({'data': {'msg': msg}, 'code': code}))
 
 @login_required
 @csrf_exempt
