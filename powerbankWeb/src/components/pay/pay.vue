@@ -18,7 +18,7 @@
 	  		let data = {'device': this.$route.params.num}
 
 	  		sendData(data, url).then((res) => {
-	  			let jsonbj = eval('('+data+')')
+	  			let jsonobj = eval('('+data+')')
 		  		WeixinJSBridge.invoke('getBrandWCPayRequest', {
 			      'appId': jsonobj.appId, // 公众号名称，由商户传入
 			      'timeStamp': jsonobj.timestamp, // 时间戳
