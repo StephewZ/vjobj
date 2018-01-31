@@ -9,7 +9,6 @@ from django.views.generic import TemplateView
 app_name = 'root'
 
 urlpatterns = [
-	url(r'^$', main.main_view, name="home"),
 	url(r'^login_in/$', user_login, name="login_in"),
 	url(r'^userinfo/$', get_userinfo, name="userinfo"),
 	url(r'^logout/$', logout_view, name="logout"),
@@ -27,4 +26,5 @@ urlpatterns = [
 	url(r'^statusDel/$', status.statusDel, name="statusDel"),
 	url(r'^statusEdit/$', status.statusEdit, name="statusEdit"),
 	url(r'^paydetail', wxpay.paydetail, name="paydetail"),
+	url(r'', main.main_view, name="home"),
 	]

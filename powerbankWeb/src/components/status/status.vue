@@ -50,7 +50,7 @@
 			</el-table-column>
 			<el-table-column prop="parent" label="所属机构">
 			</el-table-column>
-			<el-table-column prop="status" label="状态">
+			<el-table-column prop="is_enabled" label="状态">
 			</el-table-column>
 			<el-table-column prop="creator" label="创建用户">
 			</el-table-column>
@@ -82,64 +82,93 @@
 	  </div>
 
 	  <!--添加界面-->
-		<el-dialog title="添加机构" :visible.sync="loadOn.addFormVisible" :close-on-click-modal="true">
-			<el-form :model="addForm" label-width="80px" :rules="FormRules">
-				<el-form-item label="机构名称" prop="name">
+		<el-dialog title="添加角色" :visible.sync="loadOn.addFormVisible" :close-on-click-modal="true">
+			<el-form :model="addForm" ref="addForm" label-width="80px" :rules="FormRules">
+				<el-form-item label="角色名称" prop="name">
 					<el-input  v-model="addForm.name" auto-complete="off" maxlength="25" minlength="1"></el-input>
 				</el-form-item>
-				<el-form-item label="上级机构" prop="pipe">
-					<el-cascader
-				    placeholder="请选择机构"
-				    :options="options"
-				    filterable
-				    v-model="addForm.pipe"
-				    change-on-select
-				  ></el-cascader>
+				<el-form-item label="是否启用" prop="is_enabled">
+					<el-switch
+					  v-model="addForm.is_enabled"
+					  active-color="#13ce66"
+					  inactive-color="#c0c4cc"
+					  active-value="1"
+    				inactive-value="0">
+					</el-switch>
 				</el-form-item>
-				<el-form-item label="机构描述" prop="remark">
+				<el-form-item label="角色类型" prop="status_type">
+					<el-radio-group v-model="addForm.status_type">
+				    <el-radio :label="1">所有下级机构可见</el-radio>
+				    <el-radio :label="0">仅当前用户所属机构可见</el-radio>
+				  </el-radio-group>
+				</el-form-item>
+				<el-form-item label="权限配置">
+					<el-tree
+					  :data="data3"
+					  show-checkbox
+					  node-key="id"
+					  ref="addTree"
+					  :default-checked-keys="['0.001', '0.002', '0.003']">
+					</el-tree>
+				</el-form-item>
+				<el-form-item label="描述" prop="remark">
 					<el-input
 					  type="textarea"
 					  :rows="2"
 					  maxlength="100"
 					  v-model="addForm.remark"
-					  placeholder="机构描述">
+					  placeholder="描述">
 					</el-input>
 				</el-form-item>
 			</el-form>
 			<div slot="footer" class="dialog-footer">
 				<el-button @click="loadOn.addFormVisible = false" size="small">取消</el-button>
-				<el-button type="primary" @click="addSubmit" :loading="loadOn.addLoading" size="small">提交</el-button>
+				<el-button type="primary" @click="addSubmit('addForm')" :loading="loadOn.addLoading" size="small">提交</el-button>
 			</div>
 		</el-dialog>
 
 	  <!--编辑界面-->
-		<el-dialog title="机构编辑" :visible.sync="loadOn.editFormVisible" :close-on-click-modal="true">
+		<el-dialog title="角色编辑" :visible.sync="loadOn.editFormVisible" :close-on-click-modal="true">
 			<el-form :model="editForm" label-width="80px" :rules="FormRules" ref="editForm">
-				<el-form-item label="机构名称" prop="name">
+				<el-form-item label="角色名称" prop="name">
 					<el-input v-model="editForm.name" auto-complete="off"></el-input>
 				</el-form-item>
-				<el-form-item label="上级机构" prop="pipe">
-					<el-cascader
-				    placeholder="请选择机构"
-				    :options="options"
-				    filterable
-				    v-model="editForm.pipe"
-				    change-on-select
-				  ></el-cascader>
+				<el-form-item label="是否启用" prop="is_enabled">
+					<el-switch
+					  v-model="editForm.is_enabled"
+					  active-color="#13ce66"
+					  inactive-color="#c0c4cc"
+					  active-value="启用"
+    				inactive-value="禁用">
+					</el-switch>
 				</el-form-item>
-				<el-form-item label="机构描述" prop="remark">
+				<el-form-item label="角色类型" prop="status_type">
+					<el-radio-group v-model="editForm.status_type">
+				    <el-radio :label="1">所有下级机构可见</el-radio>
+				    <el-radio :label="0">仅当前用户所属机构可见</el-radio>
+				  </el-radio-group>
+				</el-form-item>
+				<el-form-item label="权限配置">
+					<el-tree
+					  :data="data3"
+					  show-checkbox
+					  node-key="id"
+					  ref="editTree">
+					</el-tree>
+				</el-form-item>
+				<el-form-item label="角色描述" prop="remark">
 					<el-input
 					  type="textarea"
 					  :rows="2"
 					  maxlength="100"
 					  v-model="editForm.remark"
-					  placeholder="机构描述">
+					  placeholder="角色描述">
 					</el-input>
 				</el-form-item>
 			</el-form>
 			<div slot="footer" class="dialog-footer">
 				<el-button @click="loadOn.editFormVisible = false" size="small">取消</el-button>
-				<el-button type="primary" @click="editSubmit" :loading="loadOn.editLoading" size="small">提交</el-button>
+				<el-button type="primary" @click="editSubmit('editForm')" :loading="loadOn.editLoading" size="small">提交</el-button>
 			</div>
 		</el-dialog>
 
@@ -149,12 +178,13 @@
 	import Crumb from 'components/crumb/crumb'
 	import {getData, sendData} from 'api/data'
 	import {urls, ERR_OK} from 'api/config'
-	import {formatList, comparePipe, msgNotice} from 'common/js/dom'
+	import {formatList, comparePipe, msgNotice, formatPowerList} from 'common/js/dom'
 
 	export default {
 	  name: 'group',
 	  data () {
 	  	return {
+	  		data3: [],
 	  		crumbMsg: ['管理员管理', '角色管理'],
 	  		filters: {
 	  			'optFilters': [],
@@ -181,14 +211,18 @@
 					name: [
 						{ required: true, message: '请输入机构名称', trigger: 'blur' }
 					],
-					pipe: [
-						{ required: true, message: '请选择上级机构', trigger: 'change' }
+					is_enabled: [
+						{ required: true }
+					],
+					status_type: [
+						{ required: true }
 					]
 				},
 				editForm: {},
 				addForm: {
 					name: '',
-					pipe: [],
+					is_enabled: '1',
+					status_type: 1,
 					remark: ''
 				}
 	  	}
@@ -217,6 +251,7 @@
           if (res.code === ERR_OK) {
             this.msgList = res.data.msg.data
             this.total = res.data.msg.total
+            this.data3 = formatPowerList(res.data.plist, res.data.permitList)
           }
           this.loadOn.tableLoading = false
           this.loadOn.resetLoad = false
@@ -327,66 +362,68 @@
 			handleAdd () {
 				this.loadOn.addFormVisible = true
 			},
-			addSubmit () {
-				if (this.addForm !== '' && this.addForm.pipe.length !== 0) {
-					this.loadOn.addLoading = true
-					let tip = urls.status.statusAdd.tips
-					let url = urls.status.statusAdd.url
-					const data = Object.assign({}, tip, this.addForm)
-					sendData(data, url).then((res) => {
+			addSubmit (formName) {
+				this.$refs[formName].validate((valid) => {
+          if (valid) {
+            this.loadOn.addLoading = true
+            let tip = urls.status.statusAdd.tips
+            let url = urls.status.statusAdd.url
+            const data = Object.assign({'powers': this.$refs.addTree.getCheckedKeys()}, tip, this.addForm)
+            sendData(data, url).then((res) => {
 	          if (res.code === ERR_OK) {
-			        msgNotice('添加成功！', 'success', false, true, this)
-	          	this._getMsgList()
-	  					this._getIndex()
-	          }
-	          this.loadOn.addLoading = false
-	        }).catch(() => {
-	        	this.loadOn.addLoading = false
-	        	msgNotice('发生错误，请刷新页面重试！', 'error', false, false, this)
-	        })
-				} else {
-					msgNotice('带<span style="color: red"> * </span>号的选项不能为空！', 'warning', true, true, this)
-					return false
-				}
+				        msgNotice('添加成功！', 'success', false, true, this)
+		          	this._getMsgList()
+		  					this._getIndex()
+		          }
+		          this.loadOn.addLoading = false
+		        }).catch(() => {
+		        	this.loadOn.addLoading = false
+		        	msgNotice('发生错误，请刷新页面重试！', 'error', false, false, this)
+		        })
+					} else {
+            msgNotice('请按照规则填写带<span style="color: red"> * </span>号的选项与选填选项！', 'warning', true, true, this)
+            return false
+          }
+        })
 			},
 			handleEdit (row) {
 				this.loadOn.editFormVisible = true
-				let len = this.options[0].value.length
-				let pipe = []
-				for (let i = 0; i < (row.pipe_id.length - len) / 4; i++) {
-					pipe.push(row.pipe_id.slice(0, len + i * 4))
-				}
-				this.editForm = Object.assign({'pipe': pipe}, row)
+				this.editForm = Object.assign({}, row)
+				setTimeout(() => {
+					this.$refs.editTree.setCheckedKeys(row.powerlist)
+				}, 20)
 			},
-			editSubmit () {
-				if (this.editForm.name.length !== 0 && this.editForm.pipe.length !== 0) {
-					this.loadOn.editLoading = true
-					let tip = urls.status.statusEdit.tips
-					let url = urls.status.statusEdit.url
-					const data = Object.assign({}, tip, this.editForm)
-					sendData(data, url).then((res) => {
-						if (res.code === ERR_OK) {
-							msgNotice('编辑成功！', 'success', false, true, this)
-							this._getMsgList()
-	  					this._getIndex()
-						} else if (res.code === 4) {
-							msgNotice('无效操作！', '', false, true, this)
-						} else if (res.code === 3) {
-							msgNotice('不能选择当前机构作为父级机构！', 'warning', false, true, this)
-						} else if (res.code === 2) {
-							msgNotice('只有根节点最后一级机构才能更换父级机构！', 'warning', false, true, this)
-						} else {
-							msgNotice('发生错误，请刷新页面重试！', 'error', false, false, this)
-						}
-						this.loadOn.editLoading = false
-					}).catch(() => {
-	        	this.loadOn.editLoading = false
-	        	msgNotice('发生错误，请刷新页面重试！', 'error', false, false, this)
-	        })
-				} else {
-					msgNotice('带<span style="color: red"> * </span>号的选项不能为空！', 'warning', true, true, this)
-					return false
-				}
+			editSubmit (formName) {
+				this.$refs[formName].validate((valid) => {
+					if (valid) {
+						this.loadOn.editLoading = true
+						let tip = urls.status.statusEdit.tips
+						let url = urls.status.statusEdit.url
+						const data = Object.assign({}, tip, this.editForm)
+						sendData(data, url).then((res) => {
+							if (res.code === ERR_OK) {
+								msgNotice('编辑成功！', 'success', false, true, this)
+								this._getMsgList()
+		  					this._getIndex()
+							} else if (res.code === 4) {
+								msgNotice('无效操作！', '', false, true, this)
+							} else if (res.code === 3) {
+								msgNotice('不能选择当前机构作为父级机构！', 'warning', false, true, this)
+							} else if (res.code === 2) {
+								msgNotice('只有根节点最后一级机构才能更换父级机构！', 'warning', false, true, this)
+							} else {
+								msgNotice('发生错误，请刷新页面重试！', 'error', false, false, this)
+							}
+							this.loadOn.editLoading = false
+						}).catch(() => {
+		        	this.loadOn.editLoading = false
+		        	msgNotice('发生错误，请刷新页面重试！', 'error', false, false, this)
+		        })
+					} else {
+						msgNotice('带<span style="color: red"> * </span>号的选项不能为空！', 'warning', true, true, this)
+						return false
+					}
+				})
 			}
 	  },
 	  components: {

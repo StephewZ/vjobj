@@ -69,7 +69,7 @@ class institutions(models.Model): #机构表
 
 class status(models.Model): #角色表
 	name = models.CharField(max_length=28, default='')
-	pipe = models.CharField(max_length=255,default = '')
+	inst_id = models.IntegerField(default=0) #所属机构id
 	status_type = models.IntegerField(default=1) #角色类型
 	is_enabled = models.BooleanField(default=True) #是否启用
 	creator = models.IntegerField(null=True, blank=True) #创建用户id user_id
@@ -85,7 +85,7 @@ class funcmodule(models.Model): #功能模块表
 	parent_id = models.IntegerField(null=True, blank=True) #父节点id
 	name = models.CharField(max_length=50, default='') #功能模块名称
 	url = models.CharField(max_length=255,default = '')
-	is_leaf = models.CharField(max_length=255,default = '')
+	is_leaf = models.BooleanField(default=True) #节点末端判断
 	is_enabled = models.BooleanField(default=True)
 	sort_num = models.IntegerField(null=True, blank=True)
 	remark = models.CharField(max_length=255, default='') #备注

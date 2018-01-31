@@ -213,7 +213,7 @@ class WeixinHelper(object):
         http://mp.weixin.qq.com/wiki/17/c0f37d5704f0b64713d5d2c37b468d75.html
         """
         _OAUTH_URL = "https://open.weixin.qq.com/connect/oauth2/authorize?appid={0}&redirect_uri={1}&response_type=code&scope={2}&state={3}#wechat_redirect"
-        return _OAUTH_URL.format(WxPayConf_pub.APPID, urllib.quote(redirect_uri), scope, state)
+        return _OAUTH_URL.format(WxPayConf_pub.APPID, urllib.parse.quote(redirect_uri), scope, state)
 
     @classmethod
     def getAccessToken(cls):

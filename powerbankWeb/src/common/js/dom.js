@@ -2,7 +2,7 @@
 export function formatList (options) {
 	let newOptions = []
 	let len = options[0][0].length
-	for (let i = 1; i < options.length; i++) {
+	for (let i = 0; i < options.length; i++) {
 		let obj = {}
 
 		obj['value'] = options[i][0]
@@ -11,19 +11,52 @@ export function formatList (options) {
 		if (options[i][2] === false) {
 			obj['children'] = []
 		}
-
-		let index = options[i][0].substring(len + 1).split('.')
-		if (index.length === 1) {
+		if (i === 0) {
 			newOptions.push(obj)
 		} else {
-			let cloneNewOp = newOptions
-			for (let j = 0; j < index.length - 1; j++) {
-				cloneNewOp = cloneNewOp[index[j] - 1]['children']
+			let index = options[i][0].substring(len + 1).split('.')
+			if (index.length === 1) {
+				newOptions[0]['children'].push(obj)
+			} else {
+				let cloneNewOp = newOptions[0]['children']
+				for (let j = 0; j < index.length - 1; j++) {
+					cloneNewOp = cloneNewOp[index[j] - 1]['children']
+				}
+				cloneNewOp.push(obj)
 			}
-			cloneNewOp.push(obj)
 		}
 	}
 	return newOptions
+}
+
+export function formatPowerList (data1, data2) {
+	let newData = []
+	for (let i = 0; i < data1.length; i++) {
+		let obj = {}
+		obj['id'] = data1[i][0]
+		obj['label'] = data1[i][1]
+		if (data2.indexOf(data1[i][0]) !== -1) {
+			obj['disabled'] = false
+		} else {
+			obj['disabled'] = true
+		}
+		if (data1[i][2] === false) {
+			obj['children'] = []
+		}
+		if (data1[i][0] !== '0') {
+			let index = data1[i][0].substring(2).split('.')
+			if (index.length === 1) {
+				newData.push(obj)
+			} else {
+				let cloneNewOp = newData
+				for (let j = 0; j < index.length - 1; j++) {
+					cloneNewOp = cloneNewOp[index[j] - 1]['children']
+				}
+				cloneNewOp.push(obj)
+			}
+		}
+	}
+	return newData
 }
 
 export function comparePipe (prop) {

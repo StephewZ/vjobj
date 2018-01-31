@@ -42,7 +42,7 @@
 				  <!-- <el-button type="success" size="mini" icon="el-icon-upload">导入</el-button>
 				  <el-button type="" size="mini" style="color:#409EFF">导出<i class="el-icon-download el-icon--right"></i></el-button> -->
 				</el-button-group>
-			</el-col=>
+			</el-col>
 			<el-col :span="10" style="text-align: right">
 				<el-button type="success" round size="mini" @click="refreshPage" :loading="refreshLoad"><i class="el-icon-refresh el-icon--left"></i>刷新</el-button>
 			</el-col>
@@ -203,7 +203,7 @@
 			</el-form>
 			<div slot="footer" class="dialog-footer">
 				<el-button @click="loadOn.editFormVisible = false" size="small">取消</el-button>
-				<el-button type="primary" @click="editSubmit" :loading="loadOn.editLoading" size="small">提交</el-button>
+				<el-button type="primary" @click="editSubmit('editForm')" :loading="loadOn.editLoading" size="small">提交</el-button>
 			</div>
 		</el-dialog>
 
@@ -466,35 +466,37 @@
 				}
 				this.editForm = Object.assign({'pipe': pipe}, row)
 			},
-			editSubmit () {
-				if (this.editForm.name.length !== 0 && this.editForm.pipe.length !== 0) {
-					this.loadOn.editLoading = true
-					let tip = urls.user.userEdit.tips
-					let url = urls.user.userEdit.url
-					const data = Object.assign({}, tip, this.editForm)
-					sendData(data, url).then((res) => {
-						if (res.code === ERR_OK) {
-							msgNotice('编辑成功！', 'success', false, true, this)
-							this._getMsgList()
-	  					this._getIndex()
-						} else if (res.code === 4) {
-							msgNotice('无效操作！', '', false, true, this)
-						} else if (res.code === 3) {
-							msgNotice('不能选择当前机构作为父级机构！', 'warning', false, true, this)
-						} else if (res.code === 2) {
-							msgNotice('只有根节点最后一级机构才能更换父级机构！', 'warning', false, true, this)
-						} else {
-							msgNotice('发生错误，请刷新页面重试！', 'error', false, false, this)
-						}
-						this.loadOn.editLoading = false
-					}).catch(() => {
-	        	this.loadOn.editLoading = false
-	        	msgNotice('发生错误，请刷新页面重试！', 'error', false, false, this)
-	        })
-				} else {
-					msgNotice('带<span style="color: red"> * </span>号的选项不能为空！', 'warning', true, true, this)
-					return false
-				}
+			editSubmit (formName) {
+				this.$refs[formName].validate((valid) => {
+					if (valid) {
+						this.loadOn.editLoading = true
+						let tip = urls.user.userEdit.tips
+						let url = urls.user.userEdit.url
+						const data = Object.assign({}, tip, this.editForm)
+						sendData(data, url).then((res) => {
+							if (res.code === ERR_OK) {
+								msgNotice('编辑成功！', 'success', false, true, this)
+								this._getMsgList()
+		  					this._getIndex()
+							} else if (res.code === 4) {
+								msgNotice('无效操作！', '', false, true, this)
+							} else if (res.code === 3) {
+								msgNotice('不能选择当前机构作为父级机构！', 'warning', false, true, this)
+							} else if (res.code === 2) {
+								msgNotice('只有根节点最后一级机构才能更换父级机构！', 'warning', false, true, this)
+							} else {
+								msgNotice('发生错误，请刷新页面重试！', 'error', false, false, this)
+							}
+							this.loadOn.editLoading = false
+						}).catch(() => {
+		        	this.loadOn.editLoading = false
+		        	msgNotice('发生错误，请刷新页面重试！', 'error', false, false, this)
+		        })
+					} else {
+            msgNotice('请按照规则填写带<span style="color: red"> * </span>号的选项与选填选项！', 'warning', true, true, this)
+            return false
+          }
+				})
 			}
 	  },
 	  components: {

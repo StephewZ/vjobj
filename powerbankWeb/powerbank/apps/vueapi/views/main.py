@@ -21,7 +21,7 @@ def index(request):
 		params = json.loads(request.body.decode())['params']['tips']
 		options = ''
 		code = 1
-		if params['tip'] in ['instIndex', 'userIndex']:
+		if params['tip'] in ['instIndex', 'userIndex', 'statusIndex']:
 			status_id_list = status_user.objects.filter(user_id = user.id).values_list('status_id')
 			if status_module.objects.filter(status_id__in = status_id_list, module_id = 3 or 7).exists():
 				inst_pipe = institutions.objects.get(id = user.inst_id).pipe_id
