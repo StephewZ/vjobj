@@ -107,7 +107,7 @@ def statusDel(request):
 	user = request.user
 	msg = ''
 	params = json.loads(request.body.decode())['params']['tips']
-	if params['tip'] == 'userDel':
+	if params['tip'] == 'statusDel':
 		status_id_list = status_user.objects.filter(user_id = user.id).values_list('status_id')
 		if status_module.objects.filter(status_id__in = status_id_list, module_id = 9).exists():
 			code = 0
@@ -115,6 +115,7 @@ def statusDel(request):
 			status.objects.filter(id=params['id']).delete()
 			status_module.objects.filter(status_id=params['id']).delete()
 			status_user.objects.filter(status_id=params['id']).delete()
+
 		else:
 			msg = 'denied'
 			code = 404
@@ -125,4 +126,17 @@ def statusDel(request):
 def statusEdit(request):
 	code = 1
 	msg = ''
+	params = json.loads(request.body.decode())['params']['tips']
+	if params['tip'] == 'statusEdit':
+		status_id_list = status_user.objects.filter(user_id = user.id).values_list('status_id')
+		if status_module.objects.filter(status_id__in = status_id_list, module_id = 9).exists():
+			code = 0
+			err = ''
+			status.objects.filter(id=params['id']).update(name=params['name'],status_type=params['status_type'],is_enabled=params['is_enabled'])
+			status_module.filter(status_id=params['id']).delete()
+			smList = []
+			for p in params['powers']:
+				newStatus_module = status_module(status_id = params['id'], module_id=funcmodule.objects.get(pipe_id=p).id, auth_type=1)
+				smList.append(newStatus_module)
+			status_module.objects.bulk_create(smList)
 	return HttpResponse(json.dumps({'data': {'msg': msg}, 'code': code}))		
