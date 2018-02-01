@@ -26,7 +26,7 @@
 		<el-col type="flex" class="row-bg toolbar" justify="space-between">
 			<el-col :span="4">
 				<el-button-group>
-					<el-button type="danger" size="mini" @click="handleDels" :disabled="this.msgList.length===0 || this.loadOn.tableLoading">批量删除</el-button>
+					<el-button type="danger" size="mini" @click="handleDels" :disabled="this.delList.length===0 || this.loadOn.tableLoading">批量删除</el-button>
 		  		<el-button size="mini" @click="handleAdd" :disabled="this.loadOn.tableLoading">添加</el-button>
 	  		</el-button-group>
   		</el-col>
@@ -44,7 +44,7 @@
 		<el-table :data="msgList" highlight-current-row v-loading="loadOn.tableLoading" @sort-change="sortChange" @selection-change="selectChange">
 			<el-table-column type="selection">
 			</el-table-column>
-			<el-table-column type="index" prop="pipe_id">
+			<el-table-column type="index" prop="id">
 			</el-table-column>
 			<el-table-column prop="name" label="角色名称">
 			</el-table-column>
@@ -92,14 +92,14 @@
 					  v-model="addForm.is_enabled"
 					  active-color="#13ce66"
 					  inactive-color="#c0c4cc"
-					  active-value="1"
-    				inactive-value="0">
+					  active-value="启用"
+    				inactive-value="禁用">
 					</el-switch>
 				</el-form-item>
 				<el-form-item label="角色类型" prop="status_type">
 					<el-radio-group v-model="addForm.status_type">
-				    <el-radio :label="1">所有下级机构可见</el-radio>
-				    <el-radio :label="0">仅当前用户所属机构可见</el-radio>
+				    <el-radio :label="1">下级机构可编辑</el-radio>
+				    <el-radio :label="0">下级机构不可编辑</el-radio>
 				  </el-radio-group>
 				</el-form-item>
 				<el-form-item label="权限配置">
@@ -144,8 +144,8 @@
 				</el-form-item>
 				<el-form-item label="角色类型" prop="status_type">
 					<el-radio-group v-model="editForm.status_type">
-				    <el-radio :label="1">所有下级机构可见</el-radio>
-				    <el-radio :label="0">仅当前用户所属机构可见</el-radio>
+				    <el-radio :label="1">下级机构可编辑</el-radio>
+				    <el-radio :label="0">下级机构不可编辑</el-radio>
 				  </el-radio-group>
 				</el-form-item>
 				<el-form-item label="权限配置">
@@ -178,12 +178,13 @@
 	import Crumb from 'components/crumb/crumb'
 	import {getData, sendData} from 'api/data'
 	import {urls, ERR_OK} from 'api/config'
-	import {formatList, comparePipe, msgNotice, formatPowerList} from 'common/js/dom'
+	import {formatList, msgNotice, formatPowerList} from 'common/js/dom'
 
 	export default {
 	  name: 'group',
 	  data () {
 	  	return {
+	  		data1: [],
 	  		data3: [],
 	  		crumbMsg: ['管理员管理', '角色管理'],
 	  		filters: {
@@ -221,7 +222,7 @@
 				editForm: {},
 				addForm: {
 					name: '',
-					is_enabled: '1',
+					is_enabled: '启用',
 					status_type: 1,
 					remark: ''
 				}
@@ -251,7 +252,7 @@
           if (res.code === ERR_OK) {
             this.msgList = res.data.msg.data
             this.total = res.data.msg.total
-            this.data3 = formatPowerList(res.data.plist, res.data.permitList)
+            this.data1 = formatPowerList(res.data.plist, res.data.permitList)
           }
           this.loadOn.tableLoading = false
           this.loadOn.resetLoad = false
@@ -303,34 +304,37 @@
       },
       selectChange (val) {
       	this.delList = val
-      	val.sort(comparePipe('pipe_id'))
-      	console.log(val)
       },
       handleDel (row) {
-		  	this.$confirm(`确认删除机构：${row.name} ？`, '提示', {type: 'warning'}).then(() => {
+		  	this.$confirm('角色关联的用户将无法正常使用，是否继续？', '提示', {type: 'warning'}).then(() => {
 		  		let tip = urls.status.statusDel.tips
 		  		let url = urls.status.statusDel.url
 		  		const data = Object.assign({}, tip, {
-		  			'delList': [{'pipe_id': row.pipe_id}]
+		  			'delList': [{'id': row.id}]
 		  		})
           sendData(data, url).then((res) => {
           	let msg = ''
           	let type = ''
-	          if (res.code === ERR_OK && res.data.err_ok === 1) {
+	          if (res.code === ERR_OK) {
 	          	msg = '删除成功！'
 	          	type = 'success'
 	          	this._getMsgList()
 	  					this._getIndex()
+	          } else if (res.code === 404) {
+	          	type = 'warning'
+	          	msg = '删除失败: 无权限！'
 	          } else {
 	          	msg = '删除失败！'
 	          	type = 'error'
 	          }
 	          msgNotice(msg, type, false, true, this)
 	        })
+        }).catch(() => {
+        	return false
         })
       },
       handleDels () {
-      	this.$confirm('只有根节点最后一级机构才能删除，是否继续？', '提示', {type: 'warning'}).then(() => {
+      	this.$confirm('角色关联的用户将无法正常使用，是否继续？', '提示', {type: 'warning'}).then(() => {
 		  		let tip = urls.status.statusDel.tips
 		  		let url = urls.status.statusDel.url
 		  		const data = Object.assign({}, tip, {
@@ -344,22 +348,21 @@
 	          	type = 'success'
 	          	this._getMsgList()
 	  					this._getIndex()
-	          } else if (res.code === 2) {
-	          	type = ''
-	          	msg = `<span style="color:green">${res.data.err_ok}</span> 个删除成功，<span style="color: red">${res.data.err}</span> 个删除失败。`
-	          	if (res.data.err_ok !== 0) {
-	          		this._getMsgList()
-	  						this._getIndex()
-	          	}
+	          } else if (res.code === 404) {
+	          	type = 'warning'
+	          	msg = '删除失败: 无权限！'
 	          } else {
 	          	type = 'error'
 	          	msg = '发生错误，请刷新页面重试！'
 	          }
-	          msgNotice(msg, type, true, true, this)
+	          msgNotice(msg, type, false, true, this)
 	        })
+        }).catch(() => {
+        	return false
         })
 			},
 			handleAdd () {
+				this.data3 = this.data1
 				this.loadOn.addFormVisible = true
 			},
 			addSubmit (formName) {
@@ -370,12 +373,22 @@
             let url = urls.status.statusAdd.url
             const data = Object.assign({'powers': this.$refs.addTree.getCheckedKeys()}, tip, this.addForm)
             sendData(data, url).then((res) => {
+	          let msg = ''
+          	let type = ''
 	          if (res.code === ERR_OK) {
-				        msgNotice('添加成功！', 'success', false, true, this)
-		          	this._getMsgList()
-		  					this._getIndex()
-		          }
-		          this.loadOn.addLoading = false
+	          	msg = '添加成功！'
+	          	type = 'success'
+	          	this._getMsgList()
+	  					this._getIndex()
+	          } else if (res.code === 404) {
+	          	type = 'warning'
+	          	msg = '添加失败: 无权限！'
+	          } else {
+	          	type = 'error'
+	          	msg = '发生错误，请刷新页面重试！'
+	          }
+	          msgNotice(msg, type, true, true, this)
+	          this.loadOn.addLoading = false
 		        }).catch(() => {
 		        	this.loadOn.addLoading = false
 		        	msgNotice('发生错误，请刷新页面重试！', 'error', false, false, this)
@@ -387,6 +400,7 @@
         })
 			},
 			handleEdit (row) {
+				this.data3 = this.data1
 				this.loadOn.editFormVisible = true
 				this.editForm = Object.assign({}, row)
 				setTimeout(() => {
@@ -399,21 +413,23 @@
 						this.loadOn.editLoading = true
 						let tip = urls.status.statusEdit.tips
 						let url = urls.status.statusEdit.url
-						const data = Object.assign({}, tip, this.editForm)
+						const data = Object.assign({'powers': this.$refs.editTree.getCheckedKeys()}, tip, this.editForm)
 						sendData(data, url).then((res) => {
-							if (res.code === ERR_OK) {
-								msgNotice('编辑成功！', 'success', false, true, this)
-								this._getMsgList()
+							let msg = ''
+	          	let type = ''
+		          if (res.code === ERR_OK) {
+		          	msg = '编辑成功！'
+		          	type = 'success'
+		          	this._getMsgList()
 		  					this._getIndex()
-							} else if (res.code === 4) {
-								msgNotice('无效操作！', '', false, true, this)
-							} else if (res.code === 3) {
-								msgNotice('不能选择当前机构作为父级机构！', 'warning', false, true, this)
-							} else if (res.code === 2) {
-								msgNotice('只有根节点最后一级机构才能更换父级机构！', 'warning', false, true, this)
-							} else {
-								msgNotice('发生错误，请刷新页面重试！', 'error', false, false, this)
-							}
+		          } else if (res.code === 404) {
+		          	type = 'warning'
+		          	msg = '编辑失败: 无权限！'
+		          } else {
+		          	type = 'error'
+		          	msg = '发生错误，请刷新页面重试！'
+		          }
+		          msgNotice(msg, type, true, true, this)
 							this.loadOn.editLoading = false
 						}).catch(() => {
 		        	this.loadOn.editLoading = false

@@ -6,6 +6,8 @@ from django.http import HttpResponse,HttpResponseRedirect
 from django.views.decorators.csrf import csrf_exempt
 from django.db.models import F,Q
 
+from .permit import Authentication
+
 import json
 from datetime import datetime
 
@@ -18,8 +20,15 @@ def getData(user, opF, pS, cP, sN, oT):
 		opF = opF[-1]
 	else:
 		opF = pipe_id
-	opF = institutions.objects.filter(pipe_id__startswith = opF).values_list('id')
-	data = status.objects.filter(inst_id__in = opF).exclude(~Q(inst_id = user.inst_id), status_type = 0)
+	p1 = ''
+	plist = []
+	for p in opF.split('.'):
+		p1 = p1 + p
+		plist.append(p1)
+	opF = institutions.objects.filter(Q(pipe_id__in = plist) | Q(pipe_id__startswith = pipe_id)).values_list('id')
+	
+	pp = institutions.objects.filter(pipe_id__in = plist)
+	data = status.objects.filter(inst_id__in = opF).exclude(~Q(inst_id = user.inst_id), status_type = 0, inst_id__in =pp)
 
 	if sN == 'made_time':
 		if oT == 'ascending':
@@ -64,8 +73,7 @@ def statusList(request):
 		params = json.loads(request.body.decode())['params']['tips']
 		code = 1
 		if params['tip'] == 'statusList':
-			status_id_list = status_user.objects.filter(user_id = user.id).values_list('status_id')
-			if status_module.objects.filter(status_id__in = status_id_list, module_id = 11).exists():
+			if Authentication(params['tip'], user):
 				code = 0
 				msg = getData(user, params['optFilters'], params['pageSize'], params['currentPage'], params['sortName'], params['orderType'])
 				plist = list(funcmodule.objects.all().order_by('pipe_id').values_list('pipe_id', 'name', 'is_leaf'))
@@ -73,6 +81,8 @@ def statusList(request):
 				smList = status_module.objects.filter(status_id__in = suList).values_list('module_id')
 				permitList = list(funcmodule.objects.filter(id__in = smList).order_by('pipe_id').values_list('pipe_id', flat=True))
 			else:
+				plist = []
+				permitList = []
 				msg = 'denied'
 				code = 404
 			return HttpResponse(json.dumps({'data': {'msg': msg, 'plist': plist, 'permitList': permitList}, 'code': code}))
@@ -84,18 +94,21 @@ def statusAdd(request):
 	msg = ''
 	params = json.loads(request.body.decode())['params']['tips']
 	if params['tip'] == 'statusAdd':
-		status_id_list = status_user.objects.filter(user_id = user.id).values_list('status_id')
-		if status_module.objects.filter(status_id__in = status_id_list, module_id = 8).exists():
+		if Authentication(params['tip'], user):
 			code = 0
 			err = ''
-			newStatus = status.objects.create(name=params['name'], status_type=params['status_type'],is_enabled=params['is_enabled'], creator = user.id, inst_id=user.inst_id)
+			if params['is_enabled'] == '启用':
+				is_enabled = 1
+			else:
+				is_enabled = 0
+			newStatus = status.objects.create(name=params['name'], status_type=params['status_type'],is_enabled=is_enabled, creator = user.id, inst_id=user.inst_id)
 			plist = list(funcmodule.objects.all().order_by('pipe_id').values_list('pipe_id', flat=True))
 			smList = []
 			for p in params['powers']:
 				# if (funcmodule.objects.get(pipe_id=p).id)
 				newStatus_module = status_module(status_id = newStatus.id, module_id=funcmodule.objects.get(pipe_id=p).id, auth_type=1,creator=user.id)
 				smList.append(newStatus_module)
-			status_module.objects.bulk_create(smList)	
+			status_module.objects.bulk_create(smList)
 		else:
 			msg = 'denied'
 			code = 404	
@@ -108,14 +121,12 @@ def statusDel(request):
 	msg = ''
 	params = json.loads(request.body.decode())['params']['tips']
 	if params['tip'] == 'statusDel':
-		status_id_list = status_user.objects.filter(user_id = user.id).values_list('status_id')
-		if status_module.objects.filter(status_id__in = status_id_list, module_id = 9).exists():
+		if Authentication(params['tip'], user):
 			code = 0
-			err = ''
-			status.objects.filter(id=params['id']).delete()
-			status_module.objects.filter(status_id=params['id']).delete()
-			status_user.objects.filter(status_id=params['id']).delete()
-
+			for dels in params['delList']:
+				status.objects.filter(id=dels['id']).delete()
+				status_module.objects.filter(status_id=dels['id']).delete()
+				status_user.objects.filter(status_id=dels['id']).delete()
 		else:
 			msg = 'denied'
 			code = 404
@@ -124,19 +135,26 @@ def statusDel(request):
 @login_required
 @csrf_exempt
 def statusEdit(request):
+	user = request.user
 	code = 1
 	msg = ''
 	params = json.loads(request.body.decode())['params']['tips']
 	if params['tip'] == 'statusEdit':
-		status_id_list = status_user.objects.filter(user_id = user.id).values_list('status_id')
-		if status_module.objects.filter(status_id__in = status_id_list, module_id = 9).exists():
+		if Authentication(params['tip'], user):
 			code = 0
 			err = ''
-			status.objects.filter(id=params['id']).update(name=params['name'],status_type=params['status_type'],is_enabled=params['is_enabled'])
-			status_module.filter(status_id=params['id']).delete()
+			if params['is_enabled'] == '启用':
+				is_enabled = 1
+			else:
+				is_enabled = 0
+			status.objects.filter(id=params['id']).update(name=params['name'],status_type=params['status_type'],is_enabled=is_enabled)
+			status_module.objects.filter(status_id=params['id']).delete()
 			smList = []
 			for p in params['powers']:
-				newStatus_module = status_module(status_id = params['id'], module_id=funcmodule.objects.get(pipe_id=p).id, auth_type=1)
+				newStatus_module = status_module(status_id = params['id'], module_id=funcmodule.objects.get(pipe_id=p).id, auth_type=1,creator=user.id)
 				smList.append(newStatus_module)
 			status_module.objects.bulk_create(smList)
-	return HttpResponse(json.dumps({'data': {'msg': msg}, 'code': code}))		
+		else:
+			msg = 'denied'
+			code = 404	
+		return HttpResponse(json.dumps({'data': {'msg': msg}, 'code': code}))

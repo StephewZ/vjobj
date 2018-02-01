@@ -6,10 +6,14 @@ from django.http import HttpResponse,HttpResponseRedirect
 from django.views.decorators.csrf import csrf_exempt
 from django.db.models import F
 
+from .permit import Authentication
+
 import json
 from datetime import datetime
 
 from users.models import users, institutions, status_user, status_module
+
+from ..models import device_inst
 
 def getData(user, opF, pS, cP, sN, oT):
 	if len(opF) != 0:
@@ -17,8 +21,8 @@ def getData(user, opF, pS, cP, sN, oT):
 	else:
 		opF = institutions.objects.get(id = user.inst_id).pipe_id
 
-	data = institutions.objects.filter(pipe_id__startswith = opF).exclude(id = user.inst_id)
-	
+	data = institutions.objects.filter(pipe_id__startswith = opF).exclude(pipe_id = opF)
+
 	if sN == 'made_time':
 		if oT == 'ascending':
 			data = data.order_by('create_time')
@@ -64,8 +68,7 @@ def instList(request):
 		params = json.loads(request.body.decode())['params']['tips']
 		code = 1
 		if params['tip'] == 'instList':
-			status_id_list = status_user.objects.filter(user_id = user.id).values_list('status_id')
-			if status_module.objects.filter(status_id__in = status_id_list, module_id = 3).exists():
+			if Authentication(params['tip'], user):
 				msg = getData(user, params['optFilters'], params['pageSize'], params['currentPage'], params['sortName'], params['orderType'])
 				code = 0
 			else:
@@ -81,8 +84,7 @@ def instAdd(request):
 		params = json.loads(request.body.decode())['params']['tips']
 		code = 1
 		if params['tip'] == 'instAdd':
-			status_id_list = status_user.objects.filter(user_id = user.id).values_list('status_id')
-			if status_module.objects.filter(status_id__in = status_id_list, module_id = 4).exists():
+			if Authentication(params['tip'], user):
 				p_pipe_id = params['pipe'][-1]
 				u_id = institutions.objects.get(id=user.inst_id).pipe_id
 
@@ -112,8 +114,7 @@ def instDel(request):
 		params = json.loads(request.body.decode())['params']['tips']
 		code = 1
 		if params['tip'] == 'instDel':
-			status_id_list = status_user.objects.filter(user_id = user.id).values_list('status_id')
-			if status_module.objects.filter(status_id__in = status_id_list, module_id = 5).exists():
+			if Authentication(params['tip'], user):
 				code = 0
 				i = 0
 				j = 0
@@ -123,6 +124,9 @@ def instDel(request):
 						i = i + 1
 					elif institutions.objects.get(pipe_id=d['pipe_id']).is_leaf == False or institutions.objects.filter(pipe_id=d['pipe_id'][:-3] + get0(str(int(d['pipe_id'].split('.')[-1]) + 1))).exists():
 						code = 2
+						i = i + 1
+					elif users.objects.filter(inst_id = institutions.objects.get(pipe_id=d['pipe_id']).id).exists() or device_inst.objects.filter(inst_id = institutions.objects.get(pipe_id=d['pipe_id']).id).exists():
+						code = 3
 						i = i + 1
 					else:
 						j = j + 1
@@ -142,8 +146,7 @@ def instEdit(request):
 		params = json.loads(request.body.decode())['params']['tips']
 		code = 1
 		if params['tip'] == 'instEdit':
-			status_id_list = status_user.objects.filter(user_id = user.id).values_list('status_id')
-			if status_module.objects.filter(status_id__in = status_id_list, module_id = 3).exists():
+			if Authentication(params['tip'], user):
 				p_pipe_id = params['pipe'][-1]
 				pipe_id = params['pipe_id']
 				code = 0

@@ -284,12 +284,23 @@
 	          	type = 'success'
 	          	this._getMsgList()
 	  					this._getIndex()
+	          } else if (res.code === 404) {
+	          	type = 'warning'
+	          	msg = '删除失败: 无权限！'
+	          } else if (res.code === 2) {
+	          	msg = '删除失败，只有根节点最后一级机构才能删除！'
+	          	type = 'error'
+	          } else if (res.code === 3) {
+	          	msg = '删除失败，请移除该机构所关联的用户与设备！'
+	          	type = 'error'
 	          } else {
 	          	msg = '删除失败！'
 	          	type = 'error'
 	          }
 	          msgNotice(msg, type, false, true, this)
 	        })
+        }).catch(() => {
+        	return false
         })
       },
       handleDels () {
@@ -307,19 +318,24 @@
 	          	type = 'success'
 	          	this._getMsgList()
 	  					this._getIndex()
-	          } else if (res.code === 2) {
+	          } else if (res.code === 2 || res.code === 3) {
 	          	type = ''
 	          	msg = `<span style="color:green">${res.data.err_ok}</span> 个删除成功，<span style="color: red">${res.data.err}</span> 个删除失败。`
 	          	if (res.data.err_ok !== 0) {
 	          		this._getMsgList()
 	  						this._getIndex()
 	          	}
+	          } else if (res.code === 404) {
+	          	type = 'warning'
+	          	msg = '删除失败: 无权限！'
 	          } else {
+	          	msg = '删除失败！'
 	          	type = 'error'
-	          	msg = '发生错误，请刷新页面重试！'
 	          }
 	          msgNotice(msg, type, true, true, this)
 	        })
+        }).catch(() => {
+        	return false
         })
 			},
 			handleAdd () {
@@ -332,11 +348,21 @@
 					let url = urls.inst.instAdd.url
 					const data = Object.assign({}, tip, this.addForm)
 					sendData(data, url).then((res) => {
+	          let msg = ''
+          	let type = ''
 	          if (res.code === ERR_OK) {
-			        msgNotice('添加成功！', 'success', false, true, this)
+	          	msg = '添加成功！'
+	          	type = 'success'
 	          	this._getMsgList()
 	  					this._getIndex()
+	          } else if (res.code === 404) {
+	          	type = 'warning'
+	          	msg = '添加失败: 无权限！'
+	          } else {
+	          	type = 'error'
+	          	msg = '发生错误，请刷新页面重试！'
 	          }
+	          msgNotice(msg, type, true, true, this)
 	          this.loadOn.addLoading = false
 	        }).catch(() => {
 	        	this.loadOn.addLoading = false

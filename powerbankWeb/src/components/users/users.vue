@@ -33,7 +33,7 @@
 		<el-col type="flex" class="row-bg toolbar" justify="space-between">
 			<el-col :span="4">
 				<el-button-group>
-					<el-button type="danger" size="mini" @click="handleDels" :disabled="this.msgList.length===0 || this.loadOn.tableLoading">批量删除</el-button>
+					<el-button type="danger" size="mini" @click="handleDels" :disabled="this.delList.length === 0 || this.loadOn.tableLoading">批量删除</el-button>
 		  		<el-button size="mini" @click="handleAdd" :disabled="this.loadOn.tableLoading">添加</el-button>
 	  		</el-button-group>
   		</el-col>
@@ -61,6 +61,7 @@
 	          <p>电话: {{ scope.row.phone }}</p>
 	          <p>地址: {{ scope.row.address }}</p>
 	          <p>描述: {{ scope.row.remark }}</p>
+	          <p>角色: {{ scope.row.statusName }}</p>
 	          <div slot="reference" class="name-wrapper">
 	            <el-tag size="medium">{{ scope.row.nickname }}</el-tag>
 	          </div>
@@ -138,13 +139,18 @@
 				    change-on-select
 				  ></el-cascader>
 				</el-form-item>
+				<el-form-item label="角色配置">
+					<el-checkbox-group v-model="addForm.checkList">
+				    <el-checkbox v-for="status in statusList" :label="status.id" :key="status.id">{{status.name}}</el-checkbox>
+				  </el-checkbox-group>
+			  </el-form-item>
 				<el-form-item label="描述" prop="remark">
 					<el-input
 					  type="textarea"
 					  :rows="2"
 					  maxlength="100"
 					  v-model="addForm.remark"
-					  placeholder="机构描述">
+					  placeholder="用户描述">
 					</el-input>
 				</el-form-item>
 			</el-form>
@@ -191,6 +197,11 @@
 				    change-on-select
 				  ></el-cascader>
 				</el-form-item>
+				<el-form-item label="角色配置">
+					<el-checkbox-group v-model="editForm.checkList">
+				    <el-checkbox v-for="status in editForm.statusList" :label="status.id" :key="status.id" :disabled="status.disabled">{{status.name}}</el-checkbox>
+				  </el-checkbox-group>
+			  </el-form-item>
 				<el-form-item label="描述" prop="remark">
 					<el-input
 					  type="textarea"
@@ -294,8 +305,10 @@
 					checkPass: '',
 					phone: '',
 					address: '',
-					remark: ''
-				}
+					remark: '',
+					checkList: []
+				},
+				statusList: []
 	  	}
 	  },
 	  created () {
@@ -322,8 +335,9 @@
           if (res.code === ERR_OK) {
             this.msgList = res.data.msg.data
             this.total = res.data.msg.total
+            this.statusList = res.data.statusList
+            console.log(this.statusList)
           }
-          console.log(this.msgList)
           this.loadOn.tableLoading = false
           this.loadOn.resetLoad = false
           this.loadOn.searchLoad = false
@@ -374,15 +388,13 @@
       },
       selectChange (val) {
       	this.delList = val
-      	val.sort(comparePipe('pipe_id'))
-      	console.log(val)
       },
       handleDel (row) {
-		  	this.$confirm(`确认删除机构：${row.name} ？`, '提示', {type: 'warning'}).then(() => {
+		  	this.$confirm(`确认删除？`, '提示', {type: 'warning'}).then(() => {
 		  		let tip = urls.user.userDel.tips
 		  		let url = urls.user.userDel.url
 		  		const data = Object.assign({}, tip, {
-		  			'delList': [{'pipe_id': row.pipe_id}]
+		  			'delList': [{'id': row.id}]
 		  		})
           sendData(data, url).then((res) => {
           	let msg = ''
@@ -392,16 +404,24 @@
 	          	type = 'success'
 	          	this._getMsgList()
 	  					this._getIndex()
+	          } else if (res.code === 404) {
+	          	type = 'warning'
+	          	msg = '删除失败: 无权限！'
+	          } else if (res.code === 2) {
+	          	msg = '删除失败, 无法删除当前登录账号！'
+	          	type = 'warning'
 	          } else {
 	          	msg = '删除失败！'
 	          	type = 'error'
 	          }
 	          msgNotice(msg, type, false, true, this)
 	        })
+        }).catch(() => {
+        	return false
         })
       },
       handleDels () {
-      	this.$confirm('只有根节点最后一级机构才能删除，是否继续？', '提示', {type: 'warning'}).then(() => {
+      	this.$confirm('确认删除？', '提示', {type: 'warning'}).then(() => {
 		  		let tip = urls.user.userDel.tips
 		  		let url = urls.user.userDel.url
 		  		const data = Object.assign({}, tip, {
@@ -415,6 +435,9 @@
 	          	type = 'success'
 	          	this._getMsgList()
 	  					this._getIndex()
+	          } else if (res.code === 404) {
+	          	type = 'warning'
+	          	msg = '删除失败: 无权限！'
 	          } else if (res.code === 2) {
 	          	type = ''
 	          	msg = `<span style="color:green">${res.data.err_ok}</span> 个删除成功，<span style="color: red">${res.data.err}</span> 个删除失败。`
@@ -423,11 +446,13 @@
 	  						this._getIndex()
 	          	}
 	          } else {
+	          	msg = '删除失败！'
 	          	type = 'error'
-	          	msg = '发生错误，请刷新页面重试！'
 	          }
 	          msgNotice(msg, type, true, true, this)
 	        })
+        }).catch(() => {
+        	return false
         })
 			},
 			handleAdd () {
@@ -441,11 +466,21 @@
             let url = urls.user.userAdd.url
             const data = Object.assign({}, tip, this.addForm)
             sendData(data, url).then((res) => {
+	          let msg = ''
+          	let type = ''
 	          if (res.code === ERR_OK) {
-				        msgNotice('添加成功！', 'success', false, true, this)
-		          	this._getMsgList()
-		  					this._getIndex()
-		          }
+	          	msg = '添加成功！'
+	          	type = 'success'
+	          	this._getMsgList()
+	  					this._getIndex()
+	          } else if (res.code === 404) {
+	          	type = 'warning'
+	          	msg = '添加失败: 无权限！'
+	          } else {
+	          	type = 'error'
+	          	msg = '发生错误，请刷新页面重试！'
+	          }
+	          msgNotice(msg, type, true, true, this)
 		          this.loadOn.addLoading = false
 		        }).catch(() => {
 		        	this.loadOn.addLoading = false
@@ -461,10 +496,11 @@
 				this.loadOn.editFormVisible = true
 				let len = this.options[0].value.length
 				let pipe = []
-				for (let i = 0; i < (row.pipe_id.length - len) / 4; i++) {
+				for (let i = 0; i < (row.pipe_id.length - len) / 4 + 1; i++) {
 					pipe.push(row.pipe_id.slice(0, len + i * 4))
 				}
 				this.editForm = Object.assign({'pipe': pipe}, row)
+				console.log(this.editForm)
 			},
 			editSubmit (formName) {
 				this.$refs[formName].validate((valid) => {
@@ -474,19 +510,21 @@
 						let url = urls.user.userEdit.url
 						const data = Object.assign({}, tip, this.editForm)
 						sendData(data, url).then((res) => {
-							if (res.code === ERR_OK) {
-								msgNotice('编辑成功！', 'success', false, true, this)
-								this._getMsgList()
+							let msg = ''
+	          	let type = ''
+		          if (res.code === ERR_OK) {
+		          	msg = '编辑成功！'
+		          	type = 'success'
+		          	this._getMsgList()
 		  					this._getIndex()
-							} else if (res.code === 4) {
-								msgNotice('无效操作！', '', false, true, this)
-							} else if (res.code === 3) {
-								msgNotice('不能选择当前机构作为父级机构！', 'warning', false, true, this)
-							} else if (res.code === 2) {
-								msgNotice('只有根节点最后一级机构才能更换父级机构！', 'warning', false, true, this)
-							} else {
-								msgNotice('发生错误，请刷新页面重试！', 'error', false, false, this)
-							}
+		          } else if (res.code === 404) {
+		          	type = 'warning'
+		          	msg = '编辑失败: 无权限！'
+		          } else {
+		          	type = 'error'
+		          	msg = '发生错误，请刷新页面重试！'
+		          }
+		          msgNotice(msg, type, true, true, this)
 							this.loadOn.editLoading = false
 						}).catch(() => {
 		        	this.loadOn.editLoading = false

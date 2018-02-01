@@ -19,7 +19,7 @@ def user_login(request):
 		username = request.POST.get('useradmin', None)
 		password = request.POST.get('password', None)
 		user = authenticate(username=username, password = password)
-		if user is not None:
+		if user is not None and user.is_delete == 0:
 			login(request, user)
 			return HttpResponseRedirect(reverse('root:home'))
 		else:
