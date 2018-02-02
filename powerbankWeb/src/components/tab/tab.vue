@@ -56,6 +56,12 @@
   .tab-h
     padding: 0
     >>> .el-tabs__header
-      margin: 0  
+      margin: 0 
+      position: fixed
+      z-index: 100000
+      background: rgb(254, 254, 254);
+      width: 100%;
+    >>> .el-tabs__content
+      top: 51px  
 </style>
 

@@ -15,6 +15,13 @@
 				  ></el-cascader>
 				</el-form-item>
 				<el-form-item>
+					<el-input
+					  placeholder="请输入查找内容"
+					  v-model="filters.mixing"
+					  clearable>
+					</el-input>
+				</el-form-item>
+				<el-form-item>
 					<el-button type="primary" size="mini" v-on:click="searchBtn" icon="el-icon-search" :loading="loadOn.searchLoad" :disabled="this.loadOn.tableLoading">查询</el-button>
 				</el-form-item>
 				<el-form-item>
@@ -26,7 +33,7 @@
 		<el-col type="flex" class="row-bg toolbar" justify="space-between">
 			<el-col :span="4">
 				<el-button-group>
-					<el-button type="danger" size="mini" @click="handleDels" :disabled="this.msgList.length===0 || this.loadOn.tableLoading">批量删除</el-button>
+					<el-button type="danger" size="mini" @click="handleDels" :disabled="this.delList.length===0 || this.loadOn.tableLoading">批量删除</el-button>
 		  		<el-button size="mini" @click="handleAdd" :disabled="this.loadOn.tableLoading">添加</el-button>
 	  		</el-button-group>
   		</el-col>
@@ -81,7 +88,7 @@
 
 	  <!--添加界面-->
 		<el-dialog title="添加机构" :visible.sync="loadOn.addFormVisible" :close-on-click-modal="true">
-			<el-form :model="addForm" label-width="80px" :rules="FormRules">
+			<el-form :model="addForm" label-width="80px" :rules="FormRules" ref="addForm">
 				<el-form-item label="机构名称" prop="name">
 					<el-input  v-model="addForm.name" auto-complete="off" maxlength="25" minlength="1"></el-input>
 				</el-form-item>
@@ -106,7 +113,7 @@
 			</el-form>
 			<div slot="footer" class="dialog-footer">
 				<el-button @click="loadOn.addFormVisible = false" size="small">取消</el-button>
-				<el-button type="primary" @click="addSubmit" :loading="loadOn.addLoading" size="small">提交</el-button>
+				<el-button type="primary" @click="addSubmit('addForm')" :loading="loadOn.addLoading" size="small">提交</el-button>
 			</div>
 		</el-dialog>
 
@@ -137,7 +144,7 @@
 			</el-form>
 			<div slot="footer" class="dialog-footer">
 				<el-button @click="loadOn.editFormVisible = false" size="small">取消</el-button>
-				<el-button type="primary" @click="editSubmit" :loading="loadOn.editLoading" size="small">提交</el-button>
+				<el-button type="primary" @click="editSubmit('editForm')" :loading="loadOn.editLoading" size="small">提交</el-button>
 			</div>
 		</el-dialog>
 
@@ -159,7 +166,8 @@
 	  			'pageSize': 10,
 	  			'currentPage': 1,
 	  			'sortName': '',
-	  			'orderType': ''
+	  			'orderType': '',
+	  			'mixing': ''
 	  		},
 	  		loadOn: {
 	  			'tableLoading': true,
@@ -291,7 +299,7 @@
 	          	msg = '删除失败，只有根节点最后一级机构才能删除！'
 	          	type = 'error'
 	          } else if (res.code === 3) {
-	          	msg = '删除失败，请移除该机构所关联的用户与设备！'
+	          	msg = '删除失败，请先移除与该机构关联的信息(用户、设备、角色)！'
 	          	type = 'error'
 	          } else {
 	          	msg = '删除失败！'
@@ -341,37 +349,39 @@
 			handleAdd () {
 				this.loadOn.addFormVisible = true
 			},
-			addSubmit () {
-				if (this.addForm !== '' && this.addForm.pipe.length !== 0) {
-					this.loadOn.addLoading = true
-					let tip = urls.inst.instAdd.tips
-					let url = urls.inst.instAdd.url
-					const data = Object.assign({}, tip, this.addForm)
-					sendData(data, url).then((res) => {
-	          let msg = ''
-          	let type = ''
-	          if (res.code === ERR_OK) {
-	          	msg = '添加成功！'
-	          	type = 'success'
-	          	this._getMsgList()
-	  					this._getIndex()
-	          } else if (res.code === 404) {
-	          	type = 'warning'
-	          	msg = '添加失败: 无权限！'
-	          } else {
-	          	type = 'error'
-	          	msg = '发生错误，请刷新页面重试！'
-	          }
-	          msgNotice(msg, type, true, true, this)
-	          this.loadOn.addLoading = false
-	        }).catch(() => {
-	        	this.loadOn.addLoading = false
-	        	msgNotice('发生错误，请刷新页面重试！', 'error', false, false, this)
-	        })
-				} else {
-					msgNotice('带<span style="color: red"> * </span>号的选项不能为空！', 'warning', true, true, this)
-					return false
-				}
+			addSubmit (formName) {
+				this.$refs[formName].validate((valid) => {
+					if (valid) {
+						this.loadOn.addLoading = true
+						let tip = urls.inst.instAdd.tips
+						let url = urls.inst.instAdd.url
+						const data = Object.assign({}, tip, this.addForm)
+						sendData(data, url).then((res) => {
+		          let msg = ''
+	          	let type = ''
+		          if (res.code === ERR_OK) {
+		          	msg = '添加成功！'
+		          	type = 'success'
+		          	this._getMsgList()
+		  					this._getIndex()
+		          } else if (res.code === 404) {
+		          	type = 'warning'
+		          	msg = '添加失败: 无权限！'
+		          } else {
+		          	type = 'error'
+		          	msg = '发生错误，请刷新页面重试！'
+		          }
+		          msgNotice(msg, type, true, true, this)
+		          this.loadOn.addLoading = false
+		        }).catch(() => {
+		        	this.loadOn.addLoading = false
+		        	msgNotice('发生错误，请刷新页面重试！', 'error', false, false, this)
+		        })
+					} else {
+						msgNotice('带<span style="color: red"> * </span>号的选项不能为空！', 'warning', true, true, this)
+						return false
+					}
+				})
 			},
 			handleEdit (row) {
 				this.loadOn.editFormVisible = true
@@ -382,35 +392,37 @@
 				}
 				this.editForm = Object.assign({'pipe': pipe}, row)
 			},
-			editSubmit () {
-				if (this.editForm.name.length !== 0 && this.editForm.pipe.length !== 0) {
-					this.loadOn.editLoading = true
-					let tip = urls.inst.instEdit.tips
-					let url = urls.inst.instEdit.url
-					const data = Object.assign({}, tip, this.editForm)
-					sendData(data, url).then((res) => {
-						if (res.code === ERR_OK) {
-							msgNotice('编辑成功！', 'success', false, true, this)
-							this._getMsgList()
-	  					this._getIndex()
-						} else if (res.code === 4) {
-							msgNotice('无效操作！', '', false, true, this)
-						} else if (res.code === 3) {
-							msgNotice('不能选择当前机构作为父级机构！', 'warning', false, true, this)
-						} else if (res.code === 2) {
-							msgNotice('只有根节点最后一级机构才能更换父级机构！', 'warning', false, true, this)
-						} else {
-							msgNotice('发生错误，请刷新页面重试！', 'error', false, false, this)
-						}
-						this.loadOn.editLoading = false
-					}).catch(() => {
-	        	this.loadOn.editLoading = false
-	        	msgNotice('发生错误，请刷新页面重试！', 'error', false, false, this)
-	        })
-				} else {
-					msgNotice('带<span style="color: red"> * </span>号的选项不能为空！', 'warning', true, true, this)
-					return false
-				}
+			editSubmit (formName) {
+				this.$refs[formName].validate((valid) => {
+					if (valid) {
+						this.loadOn.editLoading = true
+						let tip = urls.inst.instEdit.tips
+						let url = urls.inst.instEdit.url
+						const data = Object.assign({}, tip, this.editForm)
+						sendData(data, url).then((res) => {
+							if (res.code === ERR_OK) {
+								msgNotice('编辑成功！', 'success', false, true, this)
+								this._getMsgList()
+		  					this._getIndex()
+							} else if (res.code === 4) {
+								msgNotice('无效操作！', '', false, true, this)
+							} else if (res.code === 3) {
+								msgNotice('不能选择当前机构作为父级机构！', 'warning', false, true, this)
+							} else if (res.code === 2) {
+								msgNotice('只有根节点最后一级机构才能更换父级机构！', 'warning', false, true, this)
+							} else {
+								msgNotice('发生错误，请刷新页面重试！', 'error', false, false, this)
+							}
+							this.loadOn.editLoading = false
+						}).catch(() => {
+		        	this.loadOn.editLoading = false
+		        	msgNotice('发生错误，请刷新页面重试！', 'error', false, false, this)
+		        })
+					} else {
+						msgNotice('带<span style="color: red"> * </span>号的选项不能为空！', 'warning', true, true, this)
+						return false
+					}
+				})
 			}
 	  },
 	  components: {

@@ -125,14 +125,26 @@ def instDel(request):
 					elif institutions.objects.get(pipe_id=d['pipe_id']).is_leaf == False or institutions.objects.filter(pipe_id=d['pipe_id'][:-3] + get0(str(int(d['pipe_id'].split('.')[-1]) + 1))).exists():
 						code = 2
 						i = i + 1
-					elif users.objects.filter(inst_id = institutions.objects.get(pipe_id=d['pipe_id']).id).exists() or device_inst.objects.filter(inst_id = institutions.objects.get(pipe_id=d['pipe_id']).id).exists():
-						code = 3
-						i = i + 1
+					# elif users.objects.filter(inst_id = institutions.objects.get(pipe_id=d['pipe_id']).id).exists() or device_inst.objects.filter(inst_id = institutions.objects.get(pipe_id=d['pipe_id']).id).exists():
+					# 	code = 3
+					# 	i = i + 1
+					# elif status.objects.filter(inst_id = )	
 					else:
-						j = j + 1
-						institutions.objects.filter(pipe_id=d['pipe_id']).delete()
-						if institutions.objects.filter(pipe_id__startswith = d['pipe_id'][:-3]).exists() == False:
-							institutions.objects.filter(pipe_id=d["pipe_id"][:-4]).update(is_leaf=True)
+						inst_id = institutions.objects.get(pipe_id=d['pipe_id']).id
+						if users.objects.filter(inst_id = inst_id).exists():
+							code = 3
+							i = i + 1
+						elif device_inst.objects.filter(inst_id = inst_id).exists():
+							code = 3
+							i = i + 1
+						elif status.objects.filter(inst_id = inst_id).exists():
+							code = 3
+							i = i + 1
+						else:
+							j = j + 1
+							institutions.objects.filter(pipe_id=d['pipe_id']).delete()
+							if institutions.objects.filter(pipe_id__startswith = d['pipe_id'][:-3]).exists() == False:
+								institutions.objects.filter(pipe_id=d["pipe_id"][:-4]).update(is_leaf=True)
 			else:
 				msg = 'denied'
 				code = 404				

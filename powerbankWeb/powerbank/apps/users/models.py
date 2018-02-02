@@ -116,8 +116,9 @@ class status_module(models.Model): #角色 功能模块 关联表
 
 class devices(models.Model):
 	device_num = models.IntegerField(primary_key=True)
+	inst_id = models.IntegerField(null=True, blank=True)
+	status = models.IntegerField(null=True, blank=True)
 	name = models.CharField(max_length=48, default='')
-	user_id = models.IntegerField(null=True, blank=True)
 	creator = models.IntegerField(default=1)
 	create_time = models.DateTimeField(default=datetime.now)
 	edit_time = models.DateTimeField(default=datetime.now)

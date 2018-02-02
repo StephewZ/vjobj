@@ -113,5 +113,37 @@ export const urls = {
 				'tip': 'statusEdit'
 			}
 		}
+	},
+	device: {
+		deviceList: {
+			url: '/deviceList/',
+			tips: {
+				'tip': 'deviceList'
+			}
+		},
+		deviceIndex: {
+			url: '/index/',
+			tips: {
+				'tip': 'deviceIndex'
+			}
+		},
+		deviceAdd: {
+			url: '/deviceAdd/',
+			tips: {
+				'tip': 'deviceAdd'
+			}
+		},
+		deviceDel: {
+			url: '/deviceDel/',
+			tips: {
+				'tip': 'deviceDel'
+			}
+		},
+		deviceEdit: {
+			url: '/deviceEdit/',
+			tips: {
+				'tip': 'deviceEdit'
+			}
+		}
 	}
 }
