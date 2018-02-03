@@ -66,13 +66,12 @@ def instList(request):
 	if request.method == "POST":
 		user = request.user
 		params = json.loads(request.body.decode())['params']['tips']
-		code = 1
+		msg = ''
 		if params['tip'] == 'instList':
 			if Authentication(params['tip'], user):
 				msg = getData(user, params['optFilters'], params['pageSize'], params['currentPage'], params['sortName'], params['orderType'])
 				code = 0
 			else:
-				msg = 'denied'
 				code = 404
 			return HttpResponse(json.dumps({'data': {'msg': msg}, 'code': code}))
 
@@ -82,15 +81,13 @@ def instAdd(request):
 	if request.method == "POST":
 		user = request.user
 		params = json.loads(request.body.decode())['params']['tips']
-		code = 1
+		msg = ''
 		if params['tip'] == 'instAdd':
 			if Authentication(params['tip'], user):
 				p_pipe_id = params['pipe'][-1]
 				u_id = institutions.objects.get(id=user.inst_id).pipe_id
-
 				if u_id in p_pipe_id:
 					p_id = institutions.objects.get(pipe_id=p_pipe_id).id
-
 					if institutions.objects.filter(parent_id=p_id).exists():
 						newp_id = institutions.objects.filter(parent_id=p_id).order_by('-pipe_id')[0].pipe_id
 						newp_id2 = get0(str(int(newp_id.split('.')[-1]) + 1))
@@ -101,8 +98,9 @@ def instAdd(request):
 						newp_id = p_pipe_id + '.001'
 						institutions.objects.create(name=params['name'], remark=params['remark'], parent_id=p_id, is_leaf=True, pipe_id=newp_id, creator= user.id)
 					code = 0
+				else:
+					code = 404	
 			else:
-				msg = 'denied'
 				code = 404		
 		return HttpResponse(json.dumps({'data': {'msg': 'ok'}, 'code': code}))
 
@@ -112,23 +110,18 @@ def instDel(request):
 	if request.method == "POST":
 		user = request.user
 		params = json.loads(request.body.decode())['params']['tips']
-		code = 1
+		code = 0
+		i = 0
+		j = 0
 		if params['tip'] == 'instDel':
 			if Authentication(params['tip'], user):
-				code = 0
-				i = 0
-				j = 0
 				for d in params['delList']:
 					if institutions.objects.filter(pipe_id=d['pipe_id']).exists() == False:
 						code = 2
 						i = i + 1
 					elif institutions.objects.get(pipe_id=d['pipe_id']).is_leaf == False or institutions.objects.filter(pipe_id=d['pipe_id'][:-3] + get0(str(int(d['pipe_id'].split('.')[-1]) + 1))).exists():
 						code = 2
-						i = i + 1
-					# elif users.objects.filter(inst_id = institutions.objects.get(pipe_id=d['pipe_id']).id).exists() or device_inst.objects.filter(inst_id = institutions.objects.get(pipe_id=d['pipe_id']).id).exists():
-					# 	code = 3
-					# 	i = i + 1
-					# elif status.objects.filter(inst_id = )	
+						i = i + 1	
 					else:
 						inst_id = institutions.objects.get(pipe_id=d['pipe_id']).id
 						if users.objects.filter(inst_id = inst_id).exists():
@@ -156,13 +149,12 @@ def instEdit(request):
 	if request.method == "POST":
 		user = request.user
 		params = json.loads(request.body.decode())['params']['tips']
-		code = 1
 		if params['tip'] == 'instEdit':
 			if Authentication(params['tip'], user):
 				p_pipe_id = params['pipe'][-1]
 				pipe_id = params['pipe_id']
 				code = 0
-				now = datetime.now
+				now = datetime.now()
 				if pipe_id[:-4] == p_pipe_id:
 					pp = institutions.objects.get(pipe_id=pipe_id)
 					if params['remark'] != pp.remark or params['name'] != pp.name:
@@ -178,7 +170,7 @@ def instEdit(request):
 							new_pipe_id = new_pipe_id[:-3] + get0(str(int(new_pipe_id.split('.')[-1]) + 1))
 						else:
 							new_pipe_id = p_pipe_id + '.001'
-						institutions.objects.filter(pipe_id=pipe_id).update(name=params['name'], remark=params['remark'],parent_id=p_inst.id,pipe_id=new_pipe_id)
+						institutions.objects.filter(pipe_id=pipe_id).update(name=params['name'], remark=params['remark'],parent_id=p_inst.id,pipe_id=new_pipe_id,edit_time = now)
 						if institutions.objects.filter(pipe_id__startswith = pipe_id[:-3]).exists() == False:
 							institutions.objects.filter(pipe_id=pipe_id[:-4]).update(is_leaf=True)
 					else:

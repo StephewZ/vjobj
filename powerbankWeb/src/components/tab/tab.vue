@@ -58,7 +58,7 @@
     >>> .el-tabs__header
       margin: 0 
       position: fixed
-      z-index: 100000
+      z-index: 100
       background: rgb(254, 254, 254);
       width: 100%;
     >>> .el-tabs__content

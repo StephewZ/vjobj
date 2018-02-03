@@ -115,9 +115,9 @@ class status_module(models.Model): #角色 功能模块 关联表
 		db_table='status_module'
 
 class devices(models.Model):
-	device_num = models.IntegerField(primary_key=True)
+	device_num = models.IntegerField(null=True, blank=True)
 	inst_id = models.IntegerField(null=True, blank=True)
-	status = models.IntegerField(null=True, blank=True)
+	status = models.IntegerField(default=0)
 	name = models.CharField(max_length=48, default='')
 	creator = models.IntegerField(default=1)
 	create_time = models.DateTimeField(default=datetime.now)

@@ -84,7 +84,6 @@ def userList(request):
 	if request.method == "POST":
 		user = request.user
 		params = json.loads(request.body.decode())['params']['tips']
-		code = 1
 		if params['tip'] == 'userList':
 			if Authentication(params['tip'], user):
 				code = 0
@@ -101,8 +100,8 @@ def userList(request):
 
 				msg = getData(user, params['optFilters'], params['pageSize'], params['currentPage'], params['sortName'], params['orderType'], params['mixing'], statusList)
 			else:
+				msg = ''
 				statusList = []
-				msg = 'denied'
 				code = 404
 			return HttpResponse(json.dumps({'data': {'msg': msg, 'statusList': statusList}, 'code': code}))
 
@@ -110,12 +109,11 @@ def userList(request):
 @csrf_exempt
 def userAdd(request):
 	user = request.user
-	msg = ''
+	err = ''
 	params = json.loads(request.body.decode())['params']['tips']
 	if params['tip'] == 'userAdd':
 		if Authentication(params['tip'], user):
 			code = 0
-			err = ''
 			username = params['username']
 			nickname = params['nickname']
 			password1 = params['pass']
@@ -162,48 +160,44 @@ def userAdd(request):
 				code = 2
 				err = '发生未知错误，请刷新页面重试！'
 		else:
-			msg = 'denied'
 			code = 404
-		return HttpResponse(json.dumps({'data': {'msg': msg}, 'code': code, 'err': err}))
+		return HttpResponse(json.dumps({'code': code, 'err': err}))
 
 @login_required
 @csrf_exempt
 def userDel(request):
 	user = request.user
-	msg = ''
 	params = json.loads(request.body.decode())['params']['tips']
 	if params['tip'] == 'userDel':
+		code = 0
+		i = 0
+		j = 0
 		if Authentication(params['tip'], user):
-			code = 0
-			i = 0
-			j = 0
 			for d in params['delList']:
 				if int(d['id']) == user.id:
 					code = 2
 					i = i + 1
 				elif institutions.objects.get(id=user.inst_id).pipe_id in institutions.objects.get(id=users.objects.get(id=d['id']).inst_id).pipe_id:
-					users.objects.filter(id=d['id']).update(is_delete=1, nickname = '')
+					now =datetime.now()
+					users.objects.filter(id=d['id']).update(is_delete=1, nickname = users.objects.get(id=d['id']).username, username=now.strftime('%Y%m%d%H%M%S%f'),edit_time=now)
 					status_user.objects.filter(user_id=d['id']).delete()
 					j = j + 1
 				else:
 					i = i + 1	
 		else:
-			msg = 'denied'
 			code = 404
 		return HttpResponse(json.dumps({'data': {'err': i, 'err_ok': j}, 'code': code}))
 
 @login_required
 @csrf_exempt
 def userEdit(request):
-	code = 1
-	msg = ''
 	user =request.user
 	params = json.loads(request.body.decode())['params']['tips']
 	if params['tip'] == 'userEdit':
 		if Authentication(params['tip'], user):
 			code = 0
 			users.objects.filter(username=params['username'], id = params['id']).update(nickname=params['nickname'],phone=params['phone'],
-				address=params['address'],inst_id=institutions.objects.get(pipe_id=params['pipe'][-1]).id, remark=params['remark'])
+				address=params['address'],inst_id=institutions.objects.get(pipe_id=params['pipe'][-1]).id, remark=params['remark'],edit_time=datetime.now())
 			sList = list(status_user.objects.filter(user_id=params['id']).values_list('status_id', flat = True))
 
 			for s in params['checkList']:
@@ -217,6 +211,5 @@ def userEdit(request):
 				else:
 					status_user.objects.filter(status_id = ss).delete()			
 		else:
-			msg = 'denied'
 			code = 404		
-	return HttpResponse(json.dumps({'data': {'msg': msg}, 'code': code}))
+		return HttpResponse(json.dumps({'code': code}))

@@ -3,35 +3,33 @@
   	<el-menu
       default-active="2"
       class="el-menu-vertical-demo"
-      @open="handleOpen"
-      @close="handleClose"
       @select="addNewTab"
       background-color="rgba(238, 238, 238, 0.98)"
       active-text-color="#409EFF">
-      <el-submenu index="1">
+      <el-submenu index="1" v-if="leftItem.one.show">
         <template slot="title">
           <i class="el-icon-setting"></i>
           <span>管理员设置</span>
         </template>
-      <el-menu-item index="group">机构管理</el-menu-item>
-      <el-menu-item index="users">用户管理</el-menu-item>
-      <el-menu-item index="status">角色管理</el-menu-item>
+      <el-menu-item index="group" v-if="leftItem.one.instIndex">机构管理</el-menu-item>
+      <el-menu-item index="users" v-if="leftItem.one.userIndex">用户管理</el-menu-item>
+      <el-menu-item index="status" v-if="leftItem.one.statusIndex">角色管理</el-menu-item>
       </el-submenu>
-      <el-submenu index="2">
+      <el-submenu index="2" v-if="leftItem.two.show">
         <template slot="title">
           <i class="el-icon-goods"></i>
           <span>产品管理</span>
         </template>
-      <el-menu-item index="device">设备管理</el-menu-item>
+      <el-menu-item index="device" v-if="leftItem.two.deviceIndex">设备管理</el-menu-item>
       </el-submenu>
-      <el-submenu index="3">
+      <el-submenu index="3" v-if="leftItem.three.show">
         <template slot="title">
           <i class="el-icon-date"></i>
           <span>数据分析</span>
         </template>
-      <el-menu-item index="order">订单记录</el-menu-item>
-      <el-menu-item index="3-2">2</el-menu-item>
-      <el-menu-item index="3-3">3</el-menu-item>
+      <el-menu-item index="order" v-if="leftItem.three.orderIndex">订单记录</el-menu-item>
+      <el-menu-item index="customer" v-if="leftItem.three.customerIndex">客流统计</el-menu-item>
+      <el-menu-item index="achieve" v-if="leftItem.three.achieveIndex">财务报表</el-menu-item>
       </el-submenu>
     </el-menu>
   </el-aside>
@@ -41,6 +39,28 @@
   import {translate} from 'common/js/config'
 
 	export default {
+    props: {
+      leftItem: {
+        default: {
+          one: {
+            show: false,
+            instIndex: false,
+            userIndex: false,
+            statusIndex: false
+          },
+          two: {
+            show: false,
+            deviceIndex: false
+          },
+          three: {
+            show: false,
+            orderIndex: false,
+            customerIndex: false,
+            achieveIndex: false
+          }
+        }
+      }
+    },
 		computed: {
       ...mapState([
         'tabList',
@@ -48,12 +68,6 @@
       ])
     },
     methods: {
-    	handleOpen (key, keyPath) {
-        console.log(key, keyPath)
-      },
-      handleClose (key, keyPath) {
-        console.log(key, keyPath)
-      },
       addNewTab (targetName, index) {
       	index = index[1]
       	if (this.tabList.filter(f => f.name === index).length === 0) {

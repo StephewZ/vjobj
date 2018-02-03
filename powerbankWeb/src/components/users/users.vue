@@ -224,7 +224,7 @@
 	import Crumb from 'components/crumb/crumb'
 	import {getData, sendData} from 'api/data'
 	import {urls, ERR_OK} from 'api/config'
-	import {formatList, comparePipe, msgNotice} from 'common/js/dom'
+	import {formatList, msgNotice} from 'common/js/dom'
 
 	export default {
 	  name: 'group',
@@ -351,6 +351,7 @@
 	  	selectReset () {
 	  		this.loadOn.resetLoad = true
 	  		this.filters.optFilters = []
+	  		this.filters.mixing = ''
 	  		this._getMsgList()
 	  	},
 	  	refreshPage () {

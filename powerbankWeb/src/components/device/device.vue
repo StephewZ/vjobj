@@ -15,6 +15,13 @@
 				  ></el-cascader>
 				</el-form-item>
 				<el-form-item>
+					<el-input
+					  placeholder="请输入查找内容"
+					  v-model="filters.mixing"
+					  clearable>
+					</el-input>
+				</el-form-item>
+				<el-form-item>
 					<el-button type="primary" size="mini" v-on:click="searchBtn" icon="el-icon-search" :loading="loadOn.searchLoad" :disabled="this.loadOn.tableLoading">查询</el-button>
 				</el-form-item>
 				<el-form-item>
@@ -83,8 +90,8 @@
 
 	  <!--添加界面-->
 		<el-dialog title="添加设备" :visible.sync="loadOn.addFormVisible" :close-on-click-modal="true">
-			<el-form :model="addForm" label-width="80px" :rules="FormRules">
-				<el-form-item label="设备编号" prop="name">
+			<el-form :model="addForm" label-width="80px" :rules="FormRules" ref="addForm">
+				<el-form-item label="设备编号" prop="device_num">
 					<el-input  v-model="addForm.device_num" auto-complete="off" maxlength="25" minlength="1"></el-input>
 				</el-form-item>
 				<el-form-item label="设备别称" prop="name">
@@ -111,7 +118,7 @@
 			</el-form>
 			<div slot="footer" class="dialog-footer">
 				<el-button @click="loadOn.addFormVisible = false" size="small">取消</el-button>
-				<el-button type="primary" @click="addSubmit" :loading="loadOn.addLoading" size="small">提交</el-button>
+				<el-button type="primary" @click="addSubmit('addForm')" :loading="loadOn.addLoading" size="small">提交</el-button>
 			</div>
 		</el-dialog>
 
@@ -145,7 +152,7 @@
 			</el-form>
 			<div slot="footer" class="dialog-footer">
 				<el-button @click="loadOn.editFormVisible = false" size="small">取消</el-button>
-				<el-button type="primary" @click="editSubmit" :loading="loadOn.editLoading" size="small">提交</el-button>
+				<el-button type="primary" @click="editSubmit('editForm')" :loading="loadOn.editLoading" size="small">提交</el-button>
 			</div>
 		</el-dialog>
 
@@ -155,7 +162,7 @@
 	import Crumb from 'components/crumb/crumb'
 	import {getData, sendData} from 'api/data'
 	import {urls, ERR_OK} from 'api/config'
-	import {formatList, comparePipe, msgNotice} from 'common/js/dom'
+	import {formatList, msgNotice} from 'common/js/dom'
 
 	export default {
 	  name: 'group',
@@ -167,7 +174,8 @@
 	  			'pageSize': 10,
 	  			'currentPage': 1,
 	  			'sortName': '',
-	  			'orderType': ''
+	  			'orderType': '',
+	  			'mixing': ''
 	  		},
 	  		loadOn: {
 	  			'tableLoading': true,
@@ -241,6 +249,7 @@
 	  	selectReset () {
 	  		this.loadOn.resetLoad = true
 	  		this.filters.optFilters = []
+	  		this.filters.mixing = ''
 	  		this._getMsgList()
 	  	},
 	  	refreshPage () {
@@ -348,7 +357,7 @@
 			handleAdd () {
 				this.loadOn.addFormVisible = true
 			},
-			addSubmit () {
+			addSubmit (formName) {
 				this.$refs[formName].validate((valid) => {
 					if (valid) {
 						this.loadOn.addLoading = true
@@ -366,7 +375,7 @@
 		          } else if (res.code === 404) {
 		          	type = 'warning'
 		          	msg = '添加失败: 无权限！'
-		          } else if (rs.code === 2) {
+		          } else if (res.code === 2) {
 		          	type = 'warning'
 		          	msg = '添加失败: 设备已存在！'
 		          } else if (res.code === 3) {
@@ -392,40 +401,44 @@
 				this.loadOn.editFormVisible = true
 				let len = this.options[0].value.length
 				let pipe = []
-				for (let i = 0; i < (row.pipe_id.length - len) / 4; i++) {
+				for (let i = 0; i < (row.pipe_id.length - len) / 4 + 1; i++) {
 					pipe.push(row.pipe_id.slice(0, len + i * 4))
 				}
 				this.editForm = Object.assign({'pipe': pipe}, row)
 			},
-			editSubmit () {
-				if (this.editForm.name.length !== 0 && this.editForm.pipe.length !== 0) {
-					this.loadOn.editLoading = true
-					let tip = urls.inst.instEdit.tips
-					let url = urls.inst.instEdit.url
-					const data = Object.assign({}, tip, this.editForm)
-					sendData(data, url).then((res) => {
-						if (res.code === ERR_OK) {
-							msgNotice('编辑成功！', 'success', false, true, this)
-							this._getMsgList()
-	  					this._getIndex()
-						} else if (res.code === 4) {
-							msgNotice('无效操作！', '', false, true, this)
-						} else if (res.code === 3) {
-							msgNotice('不能选择当前机构作为父级机构！', 'warning', false, true, this)
-						} else if (res.code === 2) {
-							msgNotice('只有根节点最后一级机构才能更换父级机构！', 'warning', false, true, this)
-						} else {
-							msgNotice('发生错误，请刷新页面重试！', 'error', false, false, this)
-						}
-						this.loadOn.editLoading = false
-					}).catch(() => {
-	        	this.loadOn.editLoading = false
-	        	msgNotice('发生错误，请刷新页面重试！', 'error', false, false, this)
-	        })
-				} else {
-					msgNotice('带<span style="color: red"> * </span>号的选项不能为空！', 'warning', true, true, this)
-					return false
-				}
+			editSubmit (formName) {
+				this.$refs[formName].validate((valid) => {
+					if (valid) {
+						this.loadOn.editLoading = true
+						let tip = urls.device.deviceEdit.tips
+						let url = urls.device.deviceEdit.url
+						const data = Object.assign({}, tip, this.editForm)
+						sendData(data, url).then((res) => {
+							let msg = ''
+							let type = ''
+							if (res.code === ERR_OK) {
+								msg = '编辑成功！'
+								type = 'success'
+								this._getMsgList()
+		  					this._getIndex()
+							} else if (res.code === 404) {
+		          	type = 'warning'
+		          	msg = '编辑失败: 无权限！'
+		          } else {
+		          	type = '发生错误，请刷新页面重试！'
+		          	msg = 'error'
+							}
+							msgNotice(msg, type, false, true, this)
+							this.loadOn.editLoading = false
+						}).catch(() => {
+		        	this.loadOn.editLoading = false
+		        	msgNotice('发生错误，请刷新页面重试！', 'error', false, false, this)
+		        })
+					} else {
+						msgNotice('带<span style="color: red"> * </span>号的选项不能为空！', 'warning', true, true, this)
+						return false
+					}
+				})
 			}
 	  },
 	  components: {

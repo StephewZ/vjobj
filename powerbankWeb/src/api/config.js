@@ -12,6 +12,12 @@ export const urls = {
 			'tip': 'nickname'
 		}
 	},
+	userSet: {
+		url: '/userSet/',
+		tips: {
+			'tip': 'userSet'
+		}
+	},
 	logout: {
 		url: '/logout/',
 		tips: {

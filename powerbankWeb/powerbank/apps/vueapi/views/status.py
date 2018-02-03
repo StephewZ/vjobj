@@ -70,7 +70,9 @@ def statusList(request):
 	if request.method == "POST":
 		user = request.user
 		params = json.loads(request.body.decode())['params']['tips']
-		code = 1
+		msg = ''
+		plist = []
+		permitList = []
 		if params['tip'] == 'statusList':
 			if Authentication(params['tip'], user):
 				code = 0
@@ -80,9 +82,6 @@ def statusList(request):
 				smList = status_module.objects.filter(status_id__in = suList).values_list('module_id')
 				permitList = list(funcmodule.objects.filter(id__in = smList).order_by('pipe_id').values_list('pipe_id', flat=True))
 			else:
-				plist = []
-				permitList = []
-				msg = 'denied'
 				code = 404
 			return HttpResponse(json.dumps({'data': {'msg': msg, 'plist': plist, 'permitList': permitList}, 'code': code}))
 
@@ -90,12 +89,10 @@ def statusList(request):
 @csrf_exempt
 def statusAdd(request):
 	user = request.user
-	msg = ''
 	params = json.loads(request.body.decode())['params']['tips']
 	if params['tip'] == 'statusAdd':
 		if Authentication(params['tip'], user):
 			code = 0
-			err = ''
 			if params['is_enabled'] == '启用':
 				is_enabled = 1
 			else:
@@ -104,20 +101,17 @@ def statusAdd(request):
 			plist = list(funcmodule.objects.all().order_by('pipe_id').values_list('pipe_id', flat=True))
 			smList = []
 			for p in params['powers']:
-				# if (funcmodule.objects.get(pipe_id=p).id)
 				newStatus_module = status_module(status_id = newStatus.id, module_id=funcmodule.objects.get(pipe_id=p).id, auth_type=1,creator=user.id)
 				smList.append(newStatus_module)
 			status_module.objects.bulk_create(smList)
 		else:
-			msg = 'denied'
 			code = 404	
-		return HttpResponse(json.dumps({'data': {'msg': msg}, 'code': code, 'err': err}))
+		return HttpResponse(json.dumps({'code': code}))
 
 @login_required
 @csrf_exempt
 def statusDel(request):
 	user = request.user
-	msg = ''
 	params = json.loads(request.body.decode())['params']['tips']
 	if params['tip'] == 'statusDel':
 		if Authentication(params['tip'], user):
@@ -127,26 +121,22 @@ def statusDel(request):
 				status_module.objects.filter(status_id=dels['id']).delete()
 				status_user.objects.filter(status_id=dels['id']).delete()
 		else:
-			msg = 'denied'
 			code = 404
-		return HttpResponse(json.dumps({'data': {'msg': msg}, 'code': code}))
+		return HttpResponse(json.dumps({'code': code}))
 
 @login_required
 @csrf_exempt
 def statusEdit(request):
 	user = request.user
-	code = 1
-	msg = ''
 	params = json.loads(request.body.decode())['params']['tips']
 	if params['tip'] == 'statusEdit':
 		if Authentication(params['tip'], user):
 			code = 0
-			err = ''
 			if params['is_enabled'] == '启用':
 				is_enabled = 1
 			else:
 				is_enabled = 0
-			status.objects.filter(id=params['id']).update(name=params['name'],status_type=params['status_type'],is_enabled=is_enabled)
+			status.objects.filter(id=params['id']).update(name=params['name'],status_type=params['status_type'],is_enabled=is_enabled,edit_time=datetime.now())
 			status_module.objects.filter(status_id=params['id']).delete()
 			smList = []
 			for p in params['powers']:
@@ -154,6 +144,5 @@ def statusEdit(request):
 				smList.append(newStatus_module)
 			status_module.objects.bulk_create(smList)
 		else:
-			msg = 'denied'
 			code = 404	
-		return HttpResponse(json.dumps({'data': {'msg': msg}, 'code': code}))
+		return HttpResponse(json.dumps({'code': code}))

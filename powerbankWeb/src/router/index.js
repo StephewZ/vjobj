@@ -19,15 +19,17 @@ export default new Router({
   mode: 'history',
   routes: [
     {
-      path: '/',
+      path: '*',
       redirect: '/focus'
     },
     {
       path: '/focus',
+      name: 'Focus',
       component: Focus
     },
     {
       path: '/pay/:num',
+      name: 'Pay',
       component: Pay
     }
   ]

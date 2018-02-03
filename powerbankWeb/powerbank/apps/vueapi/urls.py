@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
 from django.conf.urls import url
-from .views import main, inst, user, status
+from .views import main, inst, user, status, device
 from .pay import wxpay
-from users.views import user_login, get_userinfo, logout_view
+from users.views import user_login, get_userinfo, logout_view, set_info
 from django.views.generic import TemplateView
 
 app_name = 'root'
@@ -11,6 +11,7 @@ app_name = 'root'
 urlpatterns = [
 	url(r'^login_in/$', user_login, name="login_in"),
 	url(r'^userinfo/$', get_userinfo, name="userinfo"),
+	url(r'^userSet/$', set_info, name="setInfo"),
 	url(r'^logout/$', logout_view, name="logout"),
 	url(r'^index/$', main.index, name="index"),
 	url(r'^instList/$', inst.instList, name="instList"),
@@ -26,5 +27,9 @@ urlpatterns = [
 	url(r'^statusDel/$', status.statusDel, name="statusDel"),
 	url(r'^statusEdit/$', status.statusEdit, name="statusEdit"),
 	url(r'^paydetail', wxpay.paydetail, name="paydetail"),
+	url(r'^deviceList/$', device.deviceList, name="deviceList"),
+	url(r'^deviceAdd/$', device.deviceAdd, name="deviceAdd"),
+	url(r'^deviceDel/$', device.deviceDel, name="deviceDel"),
+	url(r'^deviceEdit/$', device.deviceEdit, name="deviceEdit"),
 	url(r'', main.main_view, name="home"),
 	]

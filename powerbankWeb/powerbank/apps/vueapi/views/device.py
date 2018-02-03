@@ -90,13 +90,14 @@ def deviceAdd(request):
 	params = json.loads(request.body.decode())['params']['tips']
 	if params['tip'] == 'deviceAdd':
 		if Authentication(params['tip'], user):
+			code = 0
 			if devices.objects.filter(device_num=params['device_num'], status=0).exists():
-				code = 0
+				now = datetime.now()
 				devices.objects.filter(device_num=params['device_num'], id=params['id']).update(name=params['name'],remark=params['remark'],
-					inst_id=institutions.objects.get(pipe_id=params['pipe'][-1]).id,creator=user.id, status = 1)
+					inst_id=institutions.objects.get(pipe_id=params['pipe'][-1]).id,creator=user.id, status = 1,edit_time=now,create_time=now)
 			elif devices.objects.filter(device_num=params['device_num']).exists() == False and Authentication('admin', user):
 				devices.objects.create(device_num=params['device_num'],name=params['name'],remark=params['remark'],
-					inst_id=institutions.objects.get(pipe_id=params['pipe'][-1]).id.creator=user.id, status = 0)
+					inst_id=institutions.objects.get(pipe_id=params['pipe'][-1]).id,creator=user.id, status = 0)
 			elif devices.objects.filter(device_num=params['device_num']).exists():
 				code = 2
 			else:
@@ -120,7 +121,7 @@ def deviceDel(request):
 			for d in params['delList']:
 				if devices.objects.filter(device_num=d['device_num'], id=d['id'], status=1).exists():
 					j = j + 1
-					devices.objects.filter(device_num=d['device_num'], id=d['id']).update(status=0, name='', remark='',edit_time = datetime.now)
+					devices.objects.filter(device_num=d['device_num'], id=d['id']).update(status=0, name='', remark='', edit_time = datetime.now())
 				elif devices.objects.filter(device_num=d['device_num'], id=d['id'], status=0).exists() and Authentication('admin', user):
 					j = j + 1
 					devices.objects.filter(device_num=d['device_num'], id=d['id'], status=0).delete()
@@ -143,7 +144,7 @@ def deviceEdit(request):
 		if Authentication(params['tip'], user):
 			code = 0
 			devices.objects.filter(device_num=params['device_num'], id = params['id']).update(name=params['name'],inst_id=institutions.objects.get(pipe_id=params['pipe'][-1]).id,
-				remark=params['remark'], edit_time = datetime.now)
+				remark=params['remark'], edit_time = datetime.now())
 		else:
 			msg = 'denied'
 			code = 404		

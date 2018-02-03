@@ -400,19 +400,30 @@
 						let url = urls.inst.instEdit.url
 						const data = Object.assign({}, tip, this.editForm)
 						sendData(data, url).then((res) => {
+							let msg = ''
+	          	let type = ''
 							if (res.code === ERR_OK) {
-								msgNotice('编辑成功！', 'success', false, true, this)
+								msg = '编辑成功！'
+								type = 'success'
 								this._getMsgList()
 		  					this._getIndex()
 							} else if (res.code === 4) {
-								msgNotice('无效操作！', '', false, true, this)
+								msg = '无效操作！'
+								type = ''
 							} else if (res.code === 3) {
-								msgNotice('不能选择当前机构作为父级机构！', 'warning', false, true, this)
+								msg = '不能选择当前机构作为父级机构！'
+								type = 'warning'
 							} else if (res.code === 2) {
-								msgNotice('只有根节点最后一级机构才能更换父级机构！', 'warning', false, true, this)
-							} else {
-								msgNotice('发生错误，请刷新页面重试！', 'error', false, false, this)
+								msg = '只有根节点最后一级机构才能更换父级机构！'
+								type = 'warning'
+							} else if (res.code === 404) {
+		          	type = 'warning'
+		          	msg = '编辑失败: 无权限！'
+		          } else {
+		          	msg = '发生错误，请刷新页面重试！'
+		          	type = 'error'
 							}
+							msgNotice(msg, type, false, true, this)
 							this.loadOn.editLoading = false
 						}).catch(() => {
 		        	this.loadOn.editLoading = false
