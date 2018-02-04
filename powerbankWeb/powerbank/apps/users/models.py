@@ -25,6 +25,31 @@ class users(AbstractUser):
 
 class accounts(models.Model):
 	user_id = models.IntegerField(null=True, blank=True)
+	wechat_merchant = models.CharField(max_length=32, null=True, blank=True)
+	wechat_appId = models.CharField(max_length=32, null=True, blank=True)
+	wechat_appSecret = models.CharField(max_length=32, null=True, blank=True)
+	wechat_apiSecret = models.CharField(max_length=64, null=True, blank=True)
+	wechat_certificate = models.CharField(max_length=64, null=True, blank=True)
+	wechat_certificate_password = models.CharField(max_length=64, null=True, blank=True)
+	wechat_personalAccount = models.CharField(max_length=64, null=True, blank=True)
+	wechat_personalName = models.CharField(max_length=128, null=True, blank=True)
+	wechat_rate = models.IntegerField(default=100)
+	alipay_appId = models.CharField(max_length=32, null=True, blank=True)
+	alipay_privateKey = models.CharField(max_length=4096, null=True, blank=True)
+	alipay_publicKey = models.CharField(max_length=4096, null=True, blank=True)
+	alipay_sellerId = models.CharField(max_length=28, null=True, blank=True)
+	alipay_productCode = models.CharField(max_length=64, null=True, blank=True)
+	alipay_personalAccount = models.CharField(max_length=64, null=True, blank=True)
+	alipay_personalName = models.CharField(max_length=128, null=True, blank=True)
+	alipay_rate = models.IntegerField(default=100)
+	hotline = models.CharField(max_length=64, null=True, blank=True)
+	qrcode = models.CharField(max_length=256, null=True, blank=True)
+
+	class Meta:
+		db_table='accounts'
+
+class accounts(models.Model):
+	user_id = models.IntegerField(null=True, blank=True)
 	wechat_openId = models.CharField(max_length=28, null=True, blank=True)
 	wechat_merchant = models.CharField(max_length=32, null=True, blank=True)
 	wechat_appId = models.CharField(max_length=32, null=True, blank=True)
@@ -117,6 +142,7 @@ class status_module(models.Model): #角色 功能模块 关联表
 class devices(models.Model):
 	device_num = models.IntegerField(null=True, blank=True)
 	inst_id = models.IntegerField(null=True, blank=True)
+	user_id = models.IntegerField(null=True, blank=True)
 	status = models.IntegerField(default=0)
 	name = models.CharField(max_length=48, default='')
 	creator = models.IntegerField(default=1)
