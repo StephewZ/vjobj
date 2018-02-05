@@ -69,6 +69,8 @@
     },
     methods: {
       addNewTab (targetName, index) {
+        console.log(targetName)
+        console.log(index)
       	index = index[1]
       	if (this.tabList.filter(f => f.name === index).length === 0) {
       		let component = resolve => require([`components/${index}/${index}`], resolve)

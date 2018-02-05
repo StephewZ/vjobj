@@ -23,7 +23,7 @@
     }, function(res) {  
       if (res.err_msg == "get_brand_wcpay_request:ok") {  
         document.getElementById("myForm").submit();
-      } else {  
+      } else {
         alert('错误：' + res.err_msg);
       }  
       alert(res.err_msg);  

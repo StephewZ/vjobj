@@ -5,5 +5,6 @@ export const translate = {
 	'device': '设备管理',
 	'order': '订单记录',
 	'customer': '客流统计',
-	'achieve': '财务报表'
+	'achieve': '财务报表',
+	'setting': '设置'
 }

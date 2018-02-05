@@ -24,52 +24,28 @@ class users(AbstractUser):
 		return self.username
 
 class accounts(models.Model):
-	user_id = models.IntegerField(null=True, blank=True)
-	wechat_merchant = models.CharField(max_length=32, null=True, blank=True)
-	wechat_appId = models.CharField(max_length=32, null=True, blank=True)
-	wechat_appSecret = models.CharField(max_length=32, null=True, blank=True)
-	wechat_apiSecret = models.CharField(max_length=64, null=True, blank=True)
-	wechat_certificate = models.CharField(max_length=64, null=True, blank=True)
-	wechat_certificate_password = models.CharField(max_length=64, null=True, blank=True)
-	wechat_personalAccount = models.CharField(max_length=64, null=True, blank=True)
-	wechat_personalName = models.CharField(max_length=128, null=True, blank=True)
-	wechat_rate = models.IntegerField(default=100)
-	alipay_appId = models.CharField(max_length=32, null=True, blank=True)
-	alipay_privateKey = models.CharField(max_length=4096, null=True, blank=True)
-	alipay_publicKey = models.CharField(max_length=4096, null=True, blank=True)
-	alipay_sellerId = models.CharField(max_length=28, null=True, blank=True)
-	alipay_productCode = models.CharField(max_length=64, null=True, blank=True)
-	alipay_personalAccount = models.CharField(max_length=64, null=True, blank=True)
-	alipay_personalName = models.CharField(max_length=128, null=True, blank=True)
-	alipay_rate = models.IntegerField(default=100)
-	hotline = models.CharField(max_length=64, null=True, blank=True)
-	qrcode = models.CharField(max_length=256, null=True, blank=True)
-
-	class Meta:
-		db_table='accounts'
-
-class accounts(models.Model):
-	user_id = models.IntegerField(null=True, blank=True)
-	wechat_openId = models.CharField(max_length=28, null=True, blank=True)
-	wechat_merchant = models.CharField(max_length=32, null=True, blank=True)
-	wechat_appId = models.CharField(max_length=32, null=True, blank=True)
-	wechat_appSecret = models.CharField(max_length=32, null=True, blank=True)
-	wechat_apiSecret = models.CharField(max_length=64, null=True, blank=True)
-	wechat_certificate = models.CharField(max_length=64, null=True, blank=True)
-	wechat_certificate_password = models.CharField(max_length=64, null=True, blank=True)
-	wechat_personalAccount = models.CharField(max_length=64, null=True, blank=True)
-	wechat_personalName = models.CharField(max_length=128, null=True, blank=True)
-	wechat_rate = models.IntegerField(default=100)
-	alipay_appId = models.CharField(max_length=32, null=True, blank=True)
-	alipay_privateKey = models.CharField(max_length=4096, null=True, blank=True)
-	alipay_publicKey = models.CharField(max_length=4096, null=True, blank=True)
-	alipay_sellerId = models.CharField(max_length=28, null=True, blank=True)
-	alipay_productCode = models.CharField(max_length=64, null=True, blank=True)
-	alipay_personalAccount = models.CharField(max_length=64, null=True, blank=True)
-	alipay_personalName = models.CharField(max_length=128, null=True, blank=True)
-	alipay_rate = models.IntegerField(default=100)
-	hotline = models.CharField(max_length=64, null=True, blank=True)
-	qrcode = models.CharField(max_length=256, null=True, blank=True)
+	user_id = models.IntegerField(null=True, blank=True) #所属用户
+	wechat_merchant = models.CharField(max_length=32, null=True, blank=True) #微信商户号
+	wechat_appId = models.CharField(max_length=32, null=True, blank=True) #微信应用号
+	wechat_appSecret = models.CharField(max_length=32, null=True, blank=True) #微信引用密钥
+	wechat_apiSecret = models.CharField(max_length=64, null=True, blank=True)  #微信api密钥
+	wechat_certificate = models.CharField(max_length=64, null=True, blank=True) #微信证书 文件名
+	wechat_certificate_password = models.CharField(max_length=64, null=True, blank=True) #微信api证书(.p12文件) 密码
+	wechat_personalAccount = models.CharField(max_length=64, null=True, blank=True) #微信个人收款账号
+	wechat_personalName = models.CharField(max_length=128, null=True, blank=True) #微信个人账号名称
+	wechat_auxiliaryRate = models.IntegerField(default=5) #微信提现手续费
+	wechat_rate = models.IntegerField(default=100) #微信折扣
+	alipay_appId = models.CharField(max_length=32, null=True, blank=True) #支付宝商户appid
+	alipay_privateKey = models.CharField(max_length=4096, null=True, blank=True) #支付宝应用私钥(PKCS8格式)
+	alipay_publicKey = models.CharField(max_length=4096, null=True, blank=True) #支付宝公钥
+	alipay_sellerId = models.CharField(max_length=28, null=True, blank=True) #收款支付宝用户ID
+	alipay_productCode = models.CharField(max_length=64, null=True, blank=True) #商家和支付宝签约的产品码
+	alipay_personalAccount = models.CharField(max_length=64, null=True, blank=True) #支付宝个人收款账号
+	alipay_personalName = models.CharField(max_length=128, null=True, blank=True) #支付宝个人收款账号名称
+	alipay_auxiliaryRate = models.IntegerField(default=5) #支付宝提现手续费
+	alipay_rate = models.IntegerField(default=100) #支付宝折扣
+	hotline = models.CharField(max_length=64, null=True, blank=True) #客服电话
+	qrcode = models.CharField(max_length=256, null=True, blank=True) #客服二维码
 	create_time = models.DateTimeField(default=datetime.now)
 	edit_time = models.DateTimeField(default=datetime.now)
 	remark = models.CharField(max_length=255, default='') #备注
@@ -164,3 +140,46 @@ class operation_note(models.Model):
 
 	class Meta:
 		db_table='operation_note'
+
+class orders(models.Model):
+	trade_no = models.CharField(max_length=32, default='') #本地唯一编号 订单号
+	platform_trade_no = models.CharField(max_length=64, default='') #支付平台订单号
+	refund_trade_no = models.CharField(max_length=32, null=True, blank=True) #退款订单号
+	refund_platform_trade_no = models.CharField(max_length=64, null=True, blank=True) #支付平台退款订单号
+	merchant_no = models.CharField(max_length=32, default='') #微信商户号/支付宝收款账号
+	created_at = models.DateTimeField(default=datetime.now) #订单创建时间
+	payed_at = models.DateTimeField(null=True, blank=True) #支付完成时间
+	refunded_at = models.DateTimeField(null=True, blank=True) #发起退款时间
+	payed = models.BooleanField(default=False) #是否支付成功
+	communication_succeeded = models.BooleanField(default=False) #请求设备操作是否成功
+	refunded = models.BooleanField(default=False) #退款是否成功
+	order_tpye = models.BooleanField(default=False) #订单类型
+	customer1 = models.CharField(max_length=32, default='') #客户信息1
+	customer2 = models.CharField(max_length=256, default='') #客户信息2
+	device = models.IntegerField(null=True, blank=True) #所属设备
+	user = models.IntegerField(null=True, blank=True) #收款用户
+	payment_channel = models.CharField(max_length=32, default='') #支付方式
+	initial_amount = models.IntegerField(null=True, blank=True) #应付金额
+	rate = models.IntegerField(default=100) #折扣
+	discounted_amount = models.IntegerField(null=True, blank=True) #折后金额
+	currency = models.CharField(max_length=30, default='CNY') #币种
+	description = models.CharField(max_length=256, default='') #其他信息
+	remark = models.CharField(max_length=256, null=True,blank=True) #备注
+
+	class Meta:
+		db_table='orders'
+
+class withdrawals(models.Model):
+	trade_no = models.CharField(max_length=32, default='') #本地唯一编号
+	platform_trade_no = models.CharField(max_length=64, default='') #支付平台订单号
+	user_id = models.IntegerField(null=True, blank=True) #收款用户
+	payment_channel = models.CharField(max_length=32, default='') #支付方式
+	amount = models.IntegerField(null=True, blank=True) #金额(分)
+	auxiliary = models.IntegerField(null=True, blank=True) #手续费(分)
+	account = models.CharField(max_length=256, default='') #收款账号
+	account_name = models.CharField(max_length=256, default='') #收款账号名称
+	period_from = models.DateTimeField(default=datetime.now) #提现周期起始时间
+	period_to = models.DateTimeField(default=datetime.now) #提现周期结束时间
+	succeeded = models.IntegerField(null=True, blank=True) #是否成功 默认NULL宝石未知
+	timestamp = models.DateTimeField(default=datetime.now) #操作时间
+	description = models.CharField(max_length=256, default='') #备注
