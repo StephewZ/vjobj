@@ -9,6 +9,8 @@ from django.views.generic import TemplateView
 app_name = 'root'
 
 urlpatterns = [
+	url(r'^paydetail', wxpay.paydetail, name="paydetail"),
+	url(r'^payback_url$', wxpay.payback_url, name="payback_url"),
 	url(r'^login_in/$', user_login, name="login_in"),
 	url(r'^userinfo/$', get_userinfo, name="userinfo"),
 	url(r'^userSet/$', set_info, name="setInfo"),
@@ -26,7 +28,6 @@ urlpatterns = [
 	url(r'^statusAdd/$', status.statusAdd, name="statusAdd"),
 	url(r'^statusDel/$', status.statusDel, name="statusDel"),
 	url(r'^statusEdit/$', status.statusEdit, name="statusEdit"),
-	url(r'^paydetail', wxpay.paydetail, name="paydetail"),
 	url(r'^deviceList/$', device.deviceList, name="deviceList"),
 	url(r'^deviceAdd/$', device.deviceAdd, name="deviceAdd"),
 	url(r'^deviceDel/$', device.deviceDel, name="deviceDel"),

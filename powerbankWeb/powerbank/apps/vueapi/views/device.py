@@ -14,14 +14,7 @@ from datetime import datetime
 from users.models import users, institutions, status_user, status_module, devices
 
 from ..models import device_inst
-# class devices(models.Model):
-# 	device_num = models.IntegerField(primary_key=True)
-# 	name = models.CharField(max_length=48, default='')
-# 	inst_id = models.IntegerField(null=True, blank=True)
-# 	creator = models.IntegerField(default=1)
-# 	create_time = models.DateTimeField(default=datetime.now)
-# 	edit_time = models.DateTimeField(default=datetime.now)
-# 	remark = models.CharField(max_length=255, default='') #备注
+
 def getData(user, opF, pS, cP, sN, oT, mX):
 	pipe_id = institutions.objects.get(id = user.inst_id).pipe_id
 	if len(opF) != 0 and pipe_id in opF[-1]:

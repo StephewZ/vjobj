@@ -1,33 +1,29 @@
 <template>
 	<div class="setting">
 		<crumb :crumbMsg="crumbMsg"></crumb>
-		<el-tabs :tab-position="lefts" style="height: 100%">
-			<el-tab-pane label="角色管理">基本信息</el-tab-pane>
-	    <el-tab-pane label="修改密码">
-	    	<el-form :model="setForm" label-width="80px" :rules="FormRules" ref="setForm">
-		      <el-form-item label="旧的密码" prop="pass">
-		        <el-input type="password" maxlength="15" v-model="setForm.pass" auto-complete="off"></el-input>
-		      </el-form-item>
-		      <el-form-item label="新的密码" prop="newPass">
-		        <el-input type="password" maxlength="15" v-model="setForm.newPass" auto-complete="off"></el-input>
-		      </el-form-item>
-		      <el-form-item label="确认密码" prop="checkPass">
-		        <el-input type="password" maxlength="15" v-model="setForm.checkPass" auto-complete="off"></el-input>
-		      </el-form-item>
-		    </el-form>
-		    <div slot="footer" class="dialog-footer">
-		      <el-button type="primary" @click="setSubmit('setForm')" :loading="setLoading" size="small">提交</el-button>
-		    </div>
-	    </el-tab-pane>
-	    <el-tab-pane label="配置管理">配置管理</el-tab-pane>
-	    <el-tab-pane label="定时任务补偿">定时任务补偿</el-tab-pane>
-	  </el-tabs>
-	    
+		<div class="parentDiv">
+	  	<el-form :model="setForm" label-width="80px" :rules="FormRules" ref="setForm">
+	      <el-form-item label="旧的密码" prop="pass">
+	        <el-input type="password" maxlength="15" v-model="setForm.pass" auto-complete="off"></el-input>
+	      </el-form-item>
+	      <el-form-item label="新的密码" prop="newPass">
+	        <el-input type="password" maxlength="15" v-model="setForm.newPass" auto-complete="off"></el-input>
+	      </el-form-item>
+	      <el-form-item label="确认密码" prop="checkPass">
+	        <el-input type="password" maxlength="15" v-model="setForm.checkPass" auto-complete="off"></el-input>
+	      </el-form-item>
+	      <el-form-item>
+	      	<el-button type="primary" @click="setSubmit('setForm')" :loading="setLoading" size="small">提交</el-button>
+	      </el-form-item>
+	    </el-form>
+    </div>
   </div>
 </template>
 <script>
 	import Crumb from 'components/crumb/crumb'
 	import {sendData} from 'api/data'
+	import {urls, ERR_OK} from 'api/config'
+  import {msgNotice} from 'common/js/dom'
 
 	export default {
 		data () {
@@ -65,7 +61,6 @@
 		    }
 		  }
 		  return {
-		  	lefts: 'left',
 		  	crumbMsg: ['设置'],
 		  	setForm: {
           pass: '',
@@ -112,7 +107,6 @@
 	}
 </script>
 <style coped lang="stylus" rel="stylesheet/stylus">
-	.setting
-		width: 100%
-		hegiht: 500px
+	.parentDiv
+		padding: 10px
 </style>

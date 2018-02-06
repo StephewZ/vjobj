@@ -24,7 +24,6 @@
   import {getData} from 'api/data'
   import {logout} from 'api/userEvent'
   import {ERR_OK, urls} from 'api/config'
-  import {msgNotice} from 'common/js/dom'
 
   export default {
     data () {
