@@ -10,19 +10,22 @@
 <body>
 	<div class="device">123</div>
 	<button id="pay" onclick="pay()">支付0.01 {{ code }}</button>
+  <div id="code">{{ code }}</div>
 </body>
 </html>
 <script type="text/javascript">
 	var Ajax={
-    get: function(url, data, fn) {
+    get: function(url, fn) {
         var xhr = new XMLHttpRequest();  
         xhr.open('GET', url, true);
         xhr.onreadystatechange = function() {
             if (xhr.readyState == 4 && xhr.status == 200 || xhr.status == 304) {
-                fn.call(this, xhr.responseText);
+              console.log(xhr.responseText)
+              console.log(this)
+              fn.call(this, xhr.responseText);
             }
         };
-        xhr.send(data);
+        xhr.send();
     },
     post: function (url, data, fn) {       
         var xhr = new XMLHttpRequest();
@@ -39,11 +42,11 @@
   
 	var url = '/paydetail'
 	function onBridgeReady(){
-    alert(code)
-		Ajax.get(url, {'device': 123789, 'code': '{{ code }}'}, function(res) {
- 			console.log(res)
+    alert(document.getElementById('code').innerText)
+		Ajax.get(url + "?code=" + document.getElementById('code').innerText, function(res) {
+ 			alert(res)
  			var jsonobj = eval('('+res+')');
-		alrt(jsonobj)
+		  alrt(jsonobj)
     WeixinJSBridge.invoke('getBrandWCPayRequest', {
       'appId': jsonobj.appId, 
       'timeStamp': jsonobj.timestamp,
@@ -65,8 +68,10 @@
 	}
 
 	function pay(){
-    Ajax.post(url, {'device': 123789}, function(res) {
-      console.log(res)
+    Ajax.get(url + "?code=0713eyxI1mvBf80w4kxI1BOqxI13eyxJ", function(res) {
+      alert(res)
+      var jsonobj = eval('('+res+')');
+      alrt(jsonobj)
     })
 		if (typeof WeixinJSBridge=="undefined") {
 		  if (document.addEventListener) {

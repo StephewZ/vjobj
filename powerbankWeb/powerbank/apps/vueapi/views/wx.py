@@ -1,6 +1,9 @@
 #coding=utf8
 import time
-import urllib
+import urllib.request
+import json
+import hashlib
+import random
 
 from django.http import HttpResponseRedirect
 from django.shortcuts import HttpResponse, render_to_response, redirect, render
@@ -36,6 +39,129 @@ class WxPayConf_pub(object):
 
     #=======【HTTP客户端设置】===================================
     HTTP_CLIENT = "CURL"  # ("URLLIB", "CURL", "REQUESTS")
+
+class Common_util_pub(object):
+    """所有接口的基类"""
+
+    def trimString(self, value):
+        if value is not None and len(value) == 0:
+            value = None
+        return value
+
+    def createNoncestr(self, length = 32):
+        """产生随机字符串，不长于32位"""
+        chars = "abcdefghijklmnopqrstuvwxyz0123456789"
+        strs = []
+        for x in range(length):
+            strs.append(chars[random.randrange(0, len(chars))])
+        return "".join(strs)
+
+    def formatBizQueryParaMap(self, paraMap, urlencode):
+        """格式化参数，签名过程需要使用"""
+        slist = sorted(paraMap)
+        buff = []
+        for k in slist:
+            v = quote(paraMap[k]) if urlencode else paraMap[k]
+            buff.append("{0}={1}".format(k, v))
+
+        return "&".join(buff)
+
+    def getSign(self, obj):
+        """生成签名"""
+        #签名步骤一：按字典序排序参数,formatBizQueryParaMap已做
+        String = self.formatBizQueryParaMap(obj, False)
+        #签名步骤二：在string后加入KEY
+        String = "{0}&key={1}".format(String,WxPayConf_pub.KEY)
+        #签名步骤三：MD5加密
+        String = hashlib.md5(String.encode("utf-8")).hexdigest()
+        #签名步骤四：所有字符转为大写
+        result_ = String.upper()
+        return result_
+
+    def arrayToXml(self, arr):
+        """array转xml"""
+        xml = ["<xml>"]
+        for k, v in arr.items(): #pyhton2 iteritems
+            if v.isdigit():
+                xml.append("<{0}>{1}</{0}>".format(k, v))
+            else:
+                xml.append("<{0}><![CDATA[{1}]]></{0}>".format(k, v))
+        xml.append("</xml>")
+        return "".join(xml)
+
+    def xmlToArray(self, xml):
+        """将xml转为array"""
+        return WeixinHelper.xmlToArray(xml)
+
+    def postXmlCurl(self, xml, url, second=30):
+        """以post方式提交xml到对应的接口url"""
+        return HttpClient().postXml(xml, url, second=second)
+
+    def postXmlSSLCurl(self, xml, url, second=30):
+        """使用证书，以post方式提交xml到对应的接口url"""
+        return HttpClient().postXmlSSL(xml, url, second=second)
+
+class JsApi_pub(Common_util_pub):
+    """JSAPI支付——H5网页端调起支付接口"""
+    code = None    #code码，用以获取openid
+    openid = None  #用户的openid
+    parameters = None  #jsapi参数，格式为json
+    prepay_id = None #使用统一支付接口得到的预支付id
+    curl_timeout = None #curl超时时间
+
+    def __init__(self, timeout=WxPayConf_pub.CURL_TIMEOUT):
+        self.curl_timeout = timeout
+
+    def createOauthUrlForCode(self, redirectUrl):
+        """生成可以获得code的url"""
+        urlObj = {}
+        urlObj["appid"] = WxPayConf_pub.APPID
+        urlObj["redirect_uri"] = redirectUrl
+        urlObj["response_type"] = "code"
+        urlObj["scope"] = "snsapi_base"
+        urlObj["state"] = "STATE#wechat_redirect"
+        bizString = self.formatBizQueryParaMap(urlObj, False)
+        return "https://open.weixin.qq.com/connect/oauth2/authorize?"+bizString
+
+    def createOauthUrlForOpenid(self):
+        """生成可以获得openid的url"""
+        urlObj = {}
+        urlObj["appid"] = WxPayConf_pub.APPID
+        urlObj["secret"] = WxPayConf_pub.APPSECRET
+        urlObj["code"] = self.code
+        urlObj["grant_type"] = "authorization_code"
+        bizString = self.formatBizQueryParaMap(urlObj, False)
+        return "https://api.weixin.qq.com/sns/oauth2/access_token?"+bizString
+
+    def getOpenid(self):
+        """通过curl向微信提交code，以获取openid"""
+        url = self.createOauthUrlForOpenid()
+        data = HttpClient().get(url)
+        self.openid = json.loads(data)["openid"]
+        return self.openid
+        
+    
+    def setPrepayId(self, prepayId):
+        """设置prepay_id"""
+        self.prepay_id = prepayId
+
+    def setCode(self, code):
+        """设置code"""
+        self.code = code
+
+    def  getParameters(self):
+        """设置jsapi的参数"""
+        jsApiObj = {}
+        jsApiObj["appId"] = WxPayConf_pub.APPID
+        timeStamp = int(time.time())
+        jsApiObj["timeStamp"] = "{0}".format(timeStamp)
+        jsApiObj["nonceStr"] = self.createNoncestr()
+        jsApiObj["package"] = "prepay_id={0}".format(self.prepay_id)
+        jsApiObj["signType"] = "MD5"
+        jsApiObj["paySign"] = self.getSign(jsApiObj)
+        self.parameters = json.dumps(jsApiObj)
+
+        return self.parameters
 
 class Wxpay_client_pub(Common_util_pub):
     """请求型接口的基类"""
@@ -117,9 +243,27 @@ def paydetail(request):
 	into_url = "http://powerbank.gzncloud.com/pay/paying/"
 	return HttpResponseRedirect(re_url.format(WxPayConf_pub.APPID, into_url))
 
+@csrf_exempt
 def pay(request):
-	code = request.GET.get('code')  
+	code = request.GET.get('code')
 	fp = urllib.request.urlopen("https://api.weixin.qq.com/sns/oauth2/access_token?appid="+WxPayConf_pub.APPID+"&secret="+WxPayConf_pub.APPSECRET+"&code="+code+"&grant_type=authorization_code")  
 	token = fp.read().decode('utf-8')  
-	tokenjson = json.loads(token)  
+	tokenjson = json.loads(token)
 	openid = tokenjson['openid']
+	money = 0.01
+	money = int(float(money)*100)
+	jsApi = JsApi_pub()
+	unifiedOrder = UnifiedOrder_pub()
+	unifiedOrder.setParameter("openid",openid) #商品描述
+	unifiedOrder.setParameter("body","充值测试") #商品描述
+	timeStamp = time.time()
+	out_trade_no = "{0}{1}".format(WxPayConf_pub.APPID, int(timeStamp*100))
+	unifiedOrder.setParameter("out_trade_no", out_trade_no) #商户订单号
+	unifiedOrder.setParameter("total_fee", str(money)) #总金额
+	unifiedOrder.setParameter("notify_url", WxPayConf_pub.NOTIFY_URL) #通知地址 
+	unifiedOrder.setParameter("trade_type", "JSAPI") #交易类型
+	unifiedOrder.setParameter("attach", "6666") #附件数据，可分辨不同商家(string(127))
+	prepay_id = unifiedOrder.getPrepayId()
+	jsApi.setPrepayId(prepay_id)
+	jsApiParameters = jsApi.getParameters()
+	return HttpResponse(jsApiParameters)

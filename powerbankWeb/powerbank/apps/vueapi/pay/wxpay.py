@@ -82,7 +82,6 @@ def pay(request):
 def paydetail(request):
     """获取支付信息"""
     openid = request.openid
-    print(openid)
     money = 0.01
     money = int(float(money)*100)
 

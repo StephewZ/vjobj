@@ -16,7 +16,6 @@ def main_view(request):
 
 def pay(request):
 	code = request.GET.get('code')
-	print(code)
 	return render(request, 'pay.html', {'code': code})
 
 @login_required
