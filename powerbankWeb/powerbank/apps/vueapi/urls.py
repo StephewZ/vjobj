@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from django.conf.urls import url
-from .views import main, inst, user, status, device
+from .views import main, inst, user, status, device, wx
 from .pay import wxpay
 from users.views import user_login, get_userinfo, logout_view, set_info
 from django.views.generic import TemplateView
@@ -9,8 +9,10 @@ from django.views.generic import TemplateView
 app_name = 'root'
 
 urlpatterns = [
-	url(r'^paydetail', wxpay.paydetail, name="paydetail"),
-	url(r'^payback_url$', wxpay.payback_url, name="payback_url"),
+	url(r'^pay/re_paying/', wx.paydetail, name="pay"),
+	url(r'^pay/paying/', main.pay, name="pay"),
+	url(r'^paydetail', wx.pay, name="paydetail"),
+	url(r'^pay/payback_url$', wxpay.payback_url, name="payback_url"),
 	url(r'^login_in/$', user_login, name="login_in"),
 	url(r'^userinfo/$', get_userinfo, name="userinfo"),
 	url(r'^userSet/$', set_info, name="setInfo"),

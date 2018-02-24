@@ -39,10 +39,10 @@
   		</el-col>
   		<el-col :span="10">
   			<el-button-group>
-				  <!-- <el-button type="success" size="mini" icon="el-icon-upload">导入</el-button>
-				  <el-button type="" size="mini" style="color:#409EFF">导出<i class="el-icon-download el-icon--right"></i></el-button> -->
+					<!-- <el-button type="success" size="mini" icon="el-icon-upload">导入</el-button>
+					<el-button type="" size="mini" style="color:#409EFF">导出<i class="el-icon-download el-icon--right"></i></el-button> -->
 				</el-button-group>
-			</el-col=>
+			</el-col>
 			<el-col :span="10" style="text-align: right">
 				<el-button type="success" round size="mini" @click="refreshPage" :loading="refreshLoad"><i class="el-icon-refresh el-icon--left"></i>刷新</el-button>
 			</el-col>

@@ -49,7 +49,9 @@ def sns_userinfo_callback(callback=None):
             if not openid:
                 code = request.GET.get("code")
                 if not code:
-                    current = "http://"+ request.get_host() + request.get_full_path()
+                    # current = "http://"+ request.get_host() + request.get_full_path()
+                    current = "http://powerbank.gzncloud.com/pay/paying/"
+                    print(current)
                     return redirect(WeixinHelper.oauth2(current))
                 else:
                     data = json.loads(WeixinHelper.getAccessTokenByCode(code))

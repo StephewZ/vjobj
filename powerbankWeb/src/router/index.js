@@ -26,11 +26,6 @@ export default new Router({
       path: '/focus',
       name: 'Focus',
       component: Focus
-    },
-    {
-      path: '/pay/:num',
-      name: 'Pay',
-      component: Pay
     }
   ]
 })

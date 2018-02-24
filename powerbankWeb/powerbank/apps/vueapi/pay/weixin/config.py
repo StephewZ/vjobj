@@ -23,7 +23,7 @@ class WxPayConf_pub(object):
 
     #=======【异步通知url设置】===================================
     #异步通知url，商户根据实际开发过程设定
-    NOTIFY_URL = "119.29.141.80:7911/payback_url"
+    NOTIFY_URL = "powerbank.gzncloud.com/pay/payback_url"
 
     #=======【证书路径设置】=====================================
     #证书路径,注意应该填写绝对路径

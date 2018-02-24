@@ -1,38 +1,73 @@
 <!DOCTYPE html>
 <html>
 <head>
- <meta http-equiv="Content-type" content="text/html; charset = utf-8">
- <title>pay</title>
- <script type="text/javascript" charset = "utf-8">
- </script>
+    <meta charset=utf-8>
+    <meta name=viewport content="width=device-width,initial-scale=1">
+    <title>Document</title>
+    <script src="https://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js">
+    </script>
 </head>
 <body>
-	<button id="pay" onclick="pay()">支付0.01</button>
+	<div class="device">123</div>
+	<button id="pay" onclick="pay()">支付0.01 {{ code }}</button>
 </body>
 </html>
 <script type="text/javascript">
-
-	function onBridgeReady(){  
+	var Ajax={
+    get: function(url, data, fn) {
+        var xhr = new XMLHttpRequest();  
+        xhr.open('GET', url, true);
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState == 4 && xhr.status == 200 || xhr.status == 304) {
+                fn.call(this, xhr.responseText);
+            }
+        };
+        xhr.send(data);
+    },
+    post: function (url, data, fn) {       
+        var xhr = new XMLHttpRequest();
+        xhr.open("POST", url, true);
+        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState == 4 && (xhr.status == 200 || xhr.status == 304)) { 
+                fn.call(this, xhr.responseText);
+            }
+        };
+        xhr.send(data);
+    }
+	}
+  
+	var url = '/paydetail'
+	function onBridgeReady(){
+    alert(code)
+		Ajax.get(url, {'device': 123789, 'code': '{{ code }}'}, function(res) {
+ 			console.log(res)
+ 			var jsonobj = eval('('+res+')');
+		alrt(jsonobj)
     WeixinJSBridge.invoke('getBrandWCPayRequest', {
-      "appId": "{{appid}}", // 公众号名称，由商户传入  
-      "timeStamp": "{{sign.timestamp}}", // 时间戳  
-      "nonceStr":"{{sign.nonceStr}}", // 随机串  
-      "package": "{{package}}", // 扩展包  
-      "signType": "MD5", // 微信签名方式:1.sha1  
-      "paySign":"{{paysign}}"// 微信签名  
-    }, function(res) {  
+      'appId': jsonobj.appId, 
+      'timeStamp': jsonobj.timestamp,
+      'nonceStr': jsonobj.nonceStr,
+      'package': jsonobj.package,
+      'signType': 'MD5',
+      'paySign': jsonobj.paySign
+    }, function(res) {
       if (res.err_msg == "get_brand_wcpay_request:ok") {  
-        document.getElementById("myForm").submit();
+        alert(res.err_msg)
       } else {
-        alert('错误：' + res.err_msg);
+        alert('错误:' + res.err_msg);
       }  
       alert(res.err_msg);  
               
-    }); 
+    });
+
+    })
 	}
 
 	function pay(){
-
+    Ajax.post(url, {'device': 123789}, function(res) {
+      console.log(res)
+    })
 		if (typeof WeixinJSBridge=="undefined") {
 		  if (document.addEventListener) {
 		    document.addEventListener('WeixinJSBridgeReady',onBridgeReady,false);  

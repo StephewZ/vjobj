@@ -18,13 +18,11 @@ from functools import wraps
 
 from .config import WxPayConf_pub
 
-try:
-    import pycurl
-    from cStringIO import StringIO
-except ImportError:
-    pycurl = None
+import io
+
 
 try:
+    import pycurl
     import requests
 except ImportError:
     requests = None
@@ -146,7 +144,7 @@ class CurlClient(BaseHttpClient):
         if post:
             self.curl.setopt(pycurl.POST, True)
             self.curl.setopt(pycurl.POSTFIELDS, xml)
-        buff = StringIO()
+        buff = io.StringIO()
         self.curl.setopt(pycurl.WRITEFUNCTION, buff.write)
 
         self.curl.perform()
@@ -212,6 +210,7 @@ class WeixinHelper(object):
         """网页授权获取用户信息
         http://mp.weixin.qq.com/wiki/17/c0f37d5704f0b64713d5d2c37b468d75.html
         """
+        #_OAUTH_URL = "http://weixin.gzncloud.com/get-weixin-code.html?appid={0}&scope=snsapi_base&state=STATE&redirect_uri={1}"
         _OAUTH_URL = "https://open.weixin.qq.com/connect/oauth2/authorize?appid={0}&redirect_uri={1}&response_type=code&scope={2}&state={3}#wechat_redirect"
         return _OAUTH_URL.format(WxPayConf_pub.APPID, urllib.parse.quote(redirect_uri), scope, state)
 

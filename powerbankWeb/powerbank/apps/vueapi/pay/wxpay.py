@@ -1,6 +1,7 @@
 #coding=utf8
 import time
 from django.shortcuts import HttpResponse, render_to_response, redirect, render
+from django.views.decorators.csrf import csrf_exempt
 
 from .weixin import handler as HD
 from .weixin.backends.dj import Helper, sns_userinfo
@@ -77,6 +78,7 @@ def pay(request):
 
 @sns_userinfo
 @catch
+@csrf_exempt
 def paydetail(request):
     """获取支付信息"""
     openid = request.openid

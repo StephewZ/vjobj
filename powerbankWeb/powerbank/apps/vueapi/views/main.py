@@ -14,6 +14,11 @@ from users.models import users, institutions, status_user, status_module
 def main_view(request):
 	return render(request, 'index.html')
 
+def pay(request):
+	code = request.GET.get('code')
+	print(code)
+	return render(request, 'pay.html', {'code': code})
+
 @login_required
 @csrf_exempt
 def index(request):

@@ -59,6 +59,8 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+# CORS_ORIGIN_ALLOW_ALL = True
+
 ROOT_URLCONF = 'powerbank.urls'
 
 TEMPLATES = [
@@ -87,10 +89,10 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'powerbank',
-        'USER': 'root',
-        'PASSWORD': '123',
-        'HOST': 'localhost',
-        'PORT': '3306',
+        'USER': 'powerbank',
+        'PASSWORD': 'powerbank_password',
+        'HOST': '119.29.141.80',
+        'PORT': '8722',
     }
 }
 
