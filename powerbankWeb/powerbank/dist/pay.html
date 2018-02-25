@@ -42,25 +42,22 @@
   
 	var url = '/paydetail'
 	function onBridgeReady(){
-    alert(document.getElementById('code').innerText)
 		Ajax.get(url + "?code=" + document.getElementById('code').innerText, function(res) {
- 			alert(res)
- 			var jsonobj = eval('('+res+')');
-		  alrt(jsonobj)
+ 			var jsonobj = JSON.parse(res)
     WeixinJSBridge.invoke('getBrandWCPayRequest', {
       'appId': jsonobj.appId, 
-      'timeStamp': jsonobj.timestamp,
+      'timeStamp': jsonobj.timeStamp,
       'nonceStr': jsonobj.nonceStr,
       'package': jsonobj.package,
-      'signType': 'MD5',
+      'signType': jsonobj.signType,
       'paySign': jsonobj.paySign
     }, function(res) {
       if (res.err_msg == "get_brand_wcpay_request:ok") {  
-        alert(res.err_msg)
+        window.location.href('/pay/payback_url')
       } else {
         alert('错误:' + res.err_msg);
       }  
-      alert(res.err_msg);  
+      alert(JSON.stringify(res));
               
     });
 
@@ -68,11 +65,10 @@
 	}
 
 	function pay(){
-    Ajax.get(url + "?code=0713eyxI1mvBf80w4kxI1BOqxI13eyxJ", function(res) {
-      alert(res)
-      var jsonobj = eval('('+res+')');
-      alrt(jsonobj)
-    })
+    // Ajax.get(url + "?code=0610DqW30jfH5E1cunU30MJIW300DqWo", function(res) {
+    //   var jsonobj = JSON.parse(res)
+    //   alert(jsonobj.paySign)
+    // })
 		if (typeof WeixinJSBridge=="undefined") {
 		  if (document.addEventListener) {
 		    document.addEventListener('WeixinJSBridgeReady',onBridgeReady,false);  
