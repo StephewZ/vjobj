@@ -81,7 +81,7 @@
         }
 		  }
 		},
-		method: {
+		methods: {
 			setSubmit (formName) {
         this.$refs[formName].validate((valid) => {
           if (valid) {

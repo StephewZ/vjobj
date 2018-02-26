@@ -474,6 +474,11 @@ def paydetail(request):
 	return HttpResponseRedirect(re_url.format(WxPayConf_pub.APPID, into_url))
 
 @csrf_exempt
+def payinfo(request):
+    device = request.POST.get('device', None)
+    return HttpResponse(json.dumps({'err_msg': 'ok', 'msg': {'money': 0.01}}))
+
+@csrf_exempt
 def pay(request):
 	code = request.GET.get('code')
 	fp = urllib.request.urlopen("https://api.weixin.qq.com/sns/oauth2/access_token?appid="+WxPayConf_pub.APPID+"&secret="+WxPayConf_pub.APPSECRET+"&code="+code+"&grant_type=authorization_code")  

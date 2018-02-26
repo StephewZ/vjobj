@@ -26,6 +26,15 @@ export default new Router({
       path: '/focus',
       name: 'Focus',
       component: Focus
+    },
+    {
+      path: '/pay/paying/',
+      name: 'Pay',
+      query: {
+        code: 'code',
+        device: 'device'
+      },
+      component: Pay
     }
   ]
 })

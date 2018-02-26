@@ -10,8 +10,9 @@ app_name = 'root'
 
 urlpatterns = [
 	url(r'^pay/re_paying/', wx.paydetail, name="pay"),
-	url(r'^pay/paying/', main.pay, name="pay"),
+	# url(r'^pay/paying/', main.pay, name="pay"),
 	url(r'^paydetail', wx.pay, name="paydetail"),
+	url(r'^payinfo/$', wx.payinfo, name="payinfo"),
 	url(r'^pay/payback_url$', main.payback_url, name="payback_url"),
 	url(r'^login_in/$', user_login, name="login_in"),
 	url(r'^userinfo/$', get_userinfo, name="userinfo"),
@@ -34,5 +35,6 @@ urlpatterns = [
 	url(r'^deviceAdd/$', device.deviceAdd, name="deviceAdd"),
 	url(r'^deviceDel/$', device.deviceDel, name="deviceDel"),
 	url(r'^deviceEdit/$', device.deviceEdit, name="deviceEdit"),
+	url(r'^main_view1/$', main.main_view1, name="home1"),
 	url(r'', main.main_view, name="home"),
 	]
