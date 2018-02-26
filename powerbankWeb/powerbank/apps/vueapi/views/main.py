@@ -16,7 +16,11 @@ def main_view(request):
 
 def pay(request):
 	code = request.GET.get('code')
-	return render(request, 'pay.html', {'code': code})
+	device = request.GET.get('device').strip('/\\')
+	return render(request, 'pay.html', {'code': code, 'device': device})
+
+def payback_url(request):
+    return render(request, 'paydetail.html', {'request': 'ok'})
 
 @login_required
 @csrf_exempt

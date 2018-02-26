@@ -106,10 +106,6 @@ def paydetail(request):
         print(jsApiParameters)
         return HttpResponse(jsApiParameters)
 
-def payback_url(request):
-    print(request)
-    return render(request, 'paydetail.html', {'request': 'ok'})
-
 FAIL, SUCCESS = "FAIL", "SUCCESS"
 @catch
 def payback(request):

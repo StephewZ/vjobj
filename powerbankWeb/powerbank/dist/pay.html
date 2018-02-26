@@ -8,9 +8,8 @@
     </script>
 </head>
 <body>
-	<div class="device">123</div>
-	<button id="pay" onclick="pay()">支付0.01 {{ code }}</button>
-  <div id="code">{{ code }}</div>
+	<div id="device">{{ device }}</div>
+	<button id="pay" onclick="pay()">支付0.01</button>
 </body>
 </html>
 <script type="text/javascript">
@@ -41,25 +40,26 @@
 	}
   
 	var url = '/paydetail'
+  var code = "{{ code }}"
 	function onBridgeReady(){
-		Ajax.get(url + "?code=" + document.getElementById('code').innerText, function(res) {
+		Ajax.get(url + "?code=" + code + "&device=" + document.getElementById('device').innerText, function(res) {
  			var jsonobj = JSON.parse(res)
-    WeixinJSBridge.invoke('getBrandWCPayRequest', {
-      'appId': jsonobj.appId, 
-      'timeStamp': jsonobj.timeStamp,
-      'nonceStr': jsonobj.nonceStr,
-      'package': jsonobj.package,
-      'signType': jsonobj.signType,
-      'paySign': jsonobj.paySign
-    }, function(res) {
-      if (res.err_msg == "get_brand_wcpay_request:ok") {  
-        window.location.href('/pay/payback_url')
-      } else {
-        alert('错误:' + res.err_msg);
-      }  
-      alert(JSON.stringify(res));
-              
-    });
+      WeixinJSBridge.invoke('getBrandWCPayRequest', {
+        'appId': jsonobj.appId, 
+        'timeStamp': jsonobj.timeStamp,
+        'nonceStr': jsonobj.nonceStr,
+        'package': jsonobj.package,
+        'signType': jsonobj.signType,
+        'paySign': jsonobj.paySign
+      }, function(res) {
+        if (res.err_msg == "get_brand_wcpay_request:ok") {
+          window.location.href = '/pay/payback_url'
+        } else {
+          alert('错误:' + res.err_msg);
+        }  
+        // alert(JSON.stringify(res));
+                
+      });
 
     })
 	}
