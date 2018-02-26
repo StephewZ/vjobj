@@ -38,7 +38,7 @@ def index(request):
 		params = json.loads(request.body.decode())['params']['tips']
 		options = ''
 		code = 1
-		if params['tip'] in ['instIndex', 'userIndex', 'statusIndex', 'deviceIndex']:
+		if params['tip'] in ['instIndex', 'userIndex', 'statusIndex', 'deviceIndex', 'goodsIndex']:
 			if Authentication(params['tip'], user):
 				inst_pipe = institutions.objects.get(id = user.inst_id).pipe_id
 				options = list(institutions.objects.filter(pipe_id__startswith = inst_pipe).order_by("pipe_id").values_list('pipe_id', 'name', 'is_leaf'))

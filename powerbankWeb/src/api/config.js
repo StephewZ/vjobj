@@ -151,5 +151,69 @@ export const urls = {
 				'tip': 'deviceEdit'
 			}
 		}
+	},
+	goods: {
+		goodsList: {
+			url: '/goodsList/',
+			tips: {
+				'tip': 'goodsList'
+			}
+		},
+		goodsIndex: {
+			url: '/index/',
+			tips: {
+				'tip': 'goodsIndex'
+			}
+		},
+		goodsAdd: {
+			url: '/goodsAdd/',
+			tips: {
+				'tip': 'goodsAdd'
+			}
+		},
+		goodsDel: {
+			url: '/goodsDel/',
+			tips: {
+				'tip': 'goodsDel'
+			}
+		},
+		goodsEdit: {
+			url: '/goodsEdit/',
+			tips: {
+				'tip': 'goodsEdit'
+			}
+		}
+	},
+	goodsPipe: {
+		goodsPipeList: {
+			url: '/goodsPipeList/',
+			tips: {
+				'tip': 'goodsPipeList'
+			}
+		},
+		goodsPipeIndex: {
+			url: '/index/',
+			tips: {
+				'tip': 'goodsPipeIndex'
+			}
+		},
+		goodsPipeAdd: {
+			url: '/goodsPipeAdd/',
+			tips: {
+				'tip': 'goodsPipeAdd'
+			}
+		},
+		goodsPipeDel: {
+			url: '/goodsPipeDel/',
+			tips: {
+				'tip': 'goodsPipeDel'
+			}
+		},
+		goodsPipeEdit: {
+			url: '/goodsPipeEdit/',
+			tips: {
+				'tip': 'goodsPipeEdit'
+			}
+		}
 	}
 }

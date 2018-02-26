@@ -183,3 +183,33 @@ class withdrawals(models.Model):
 	succeeded = models.IntegerField(null=True, blank=True) #是否成功 默认NULL宝石未知
 	timestamp = models.DateTimeField(default=datetime.now) #操作时间
 	description = models.CharField(max_length=256, default='') #备注
+
+class goodsPipe(models.Model):
+	goods_id = models.IntegerField(default=0)
+	purchase_price = models.IntegerField(null=True, blank=True) #成本
+	retail_price = models.IntegerField(null=True, blank=True) #售价
+	status_type = models.IntegerField(default=1) #类型
+	description = models.CharField(max_length=256, default='') #其他信息
+	remark = models.CharField(max_length=255, default='')
+
+class goodsPipe_device(models.Model):
+	goods_id = models.IntegerField(default=0)
+	device_id = models.IntegerField(default=0)
+	sequence = models.IntegerField(default=1)
+	creator = models.IntegerField(null=True, blank=True) #创建用户id user_id
+	create_time = models.DateTimeField(default=datetime.now)
+	edit_time = models.DateTimeField(default=datetime.now)
+	remark = models.CharField(max_length=255, default='')
+
+class goods(models.Model):
+	name = models.CharField(max_length=28, default='')
+	inst_id = models.IntegerField(default=0) #所属机构id
+	purchase_price = models.IntegerField(null=True, blank=True) #成本
+	retail_price = models.IntegerField(null=True, blank=True) #售价
+	currency = models.CharField(max_length=30, default='CNY')
+	deleted = models.BooleanField(default=False)
+	status_type = models.IntegerField(default=1) #商品类型
+	creator = models.IntegerField(null=True, blank=True) #创建用户id user_id
+	create_time = models.DateTimeField(default=datetime.now)
+	edit_time = models.DateTimeField(default=datetime.now)
+	remark = models.CharField(max_length=255, default='')
