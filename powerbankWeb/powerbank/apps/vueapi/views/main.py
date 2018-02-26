@@ -24,7 +24,7 @@ def main_view(request):
 
 def pay(request):
 	code = request.GET.get('code')
-	device = request.GET.get('device').strip('/\\')
+	device = request.GET.get('device')
 	return HttpResponseRedirect('/pay/paying/?device=' + device + '&code=' + code)
 
 def payback_url(request):
