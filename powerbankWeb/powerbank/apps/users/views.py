@@ -47,7 +47,7 @@ def get_userinfo(request):
 			leftItem['two'] = {}
 			leftItem['two']['show'] = False
 
-			for item in ['deviceIndex']:
+			for item in ['deviceIndex', 'goodsIndex', 'goodsPipeIndex']:
 				if Authentication(item, user):
 					leftItem['two']['show'] = True
 					leftItem['two'][item] = True

@@ -21,6 +21,8 @@
           <span>产品管理</span>
         </template>
       <el-menu-item index="device" v-if="leftItem.two.deviceIndex">设备管理</el-menu-item>
+      <el-menu-item index="goods" v-if="leftItem.two.goodsIndex">商品管理</el-menu-item>
+      <el-menu-item index="goods_pipe" v-if="leftItem.two.goods_pipeIndex">货道管理</el-menu-item>
       </el-submenu>
       <el-submenu index="3" v-if="leftItem.three.show">
         <template slot="title">
@@ -50,7 +52,9 @@
           },
           two: {
             show: false,
-            deviceIndex: false
+            deviceIndex: false,
+            goodsIndex: false,
+            goods_pipeIndex: false
           },
           three: {
             show: false,
@@ -69,8 +73,6 @@
     },
     methods: {
       addNewTab (targetName, index) {
-        console.log(targetName)
-        console.log(index)
       	index = index[1]
       	if (this.tabList.filter(f => f.name === index).length === 0) {
       		let component = resolve => require([`components/${index}/${index}`], resolve)

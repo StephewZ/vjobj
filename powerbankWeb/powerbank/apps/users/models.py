@@ -163,7 +163,6 @@ class orders(models.Model):
 	rate = models.IntegerField(default=100) #折扣
 	discounted_amount = models.IntegerField(null=True, blank=True) #折后金额
 	currency = models.CharField(max_length=30, default='CNY') #币种
-	description = models.CharField(max_length=256, default='') #其他信息
 	remark = models.CharField(max_length=256, null=True,blank=True) #备注
 
 	class Meta:
@@ -182,18 +181,29 @@ class withdrawals(models.Model):
 	period_to = models.DateTimeField(default=datetime.now) #提现周期结束时间
 	succeeded = models.IntegerField(null=True, blank=True) #是否成功 默认NULL宝石未知
 	timestamp = models.DateTimeField(default=datetime.now) #操作时间
-	description = models.CharField(max_length=256, default='') #备注
+	remark = models.CharField(max_length=256, null=True,blank=True) #备注
 
-class goodsPipe(models.Model):
+	class Meta:
+		db_table='withdrawals'
+
+class goods_pipe(models.Model):
+	goods_num = models.CharField(max_length=28, default='')
 	goods_id = models.IntegerField(default=0)
+	name = models.CharField(max_length=28, default='')
+	currency = models.CharField(max_length=30, default='CNY')
 	purchase_price = models.IntegerField(null=True, blank=True) #成本
 	retail_price = models.IntegerField(null=True, blank=True) #售价
-	status_type = models.IntegerField(default=1) #类型
-	description = models.CharField(max_length=256, default='') #其他信息
+	goods_pipe_type = models.IntegerField(default=1) #类型
+	creator = models.IntegerField(null=True, blank=True) #创建用户id user_id
+	create_time = models.DateTimeField(default=datetime.now)
+	edit_time = models.DateTimeField(default=datetime.now)
 	remark = models.CharField(max_length=255, default='')
 
-class goodsPipe_device(models.Model):
-	goods_id = models.IntegerField(default=0)
+	class Meta:
+		db_table='goods_pipe'
+
+class goods_pipe_device(models.Model):
+	goods_pipe_id = models.IntegerField(default=0)
 	device_id = models.IntegerField(default=0)
 	sequence = models.IntegerField(default=1)
 	creator = models.IntegerField(null=True, blank=True) #创建用户id user_id
@@ -201,15 +211,21 @@ class goodsPipe_device(models.Model):
 	edit_time = models.DateTimeField(default=datetime.now)
 	remark = models.CharField(max_length=255, default='')
 
+	class Meta:
+		db_table='goods_Pipe_device'
+
 class goods(models.Model):
+	goods_num = models.CharField(max_length=28, default='')
 	name = models.CharField(max_length=28, default='')
 	inst_id = models.IntegerField(default=0) #所属机构id
 	purchase_price = models.IntegerField(null=True, blank=True) #成本
 	retail_price = models.IntegerField(null=True, blank=True) #售价
 	currency = models.CharField(max_length=30, default='CNY')
-	deleted = models.BooleanField(default=False)
-	status_type = models.IntegerField(default=1) #商品类型
+	goods_type = models.IntegerField(default=1) #商品类型
 	creator = models.IntegerField(null=True, blank=True) #创建用户id user_id
 	create_time = models.DateTimeField(default=datetime.now)
 	edit_time = models.DateTimeField(default=datetime.now)
 	remark = models.CharField(max_length=255, default='')
+
+	class Meta:
+		db_table='goods'

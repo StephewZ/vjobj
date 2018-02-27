@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from django.conf.urls import url
-from .views import main, inst, user, status, device, wx
+from .views import main, inst, user, status, device, wx, goods, goods_pipe
 from .pay import wxpay
 from users.views import user_login, get_userinfo, logout_view, set_info
 from django.views.generic import TemplateView
@@ -35,6 +35,10 @@ urlpatterns = [
 	url(r'^deviceAdd/$', device.deviceAdd, name="deviceAdd"),
 	url(r'^deviceDel/$', device.deviceDel, name="deviceDel"),
 	url(r'^deviceEdit/$', device.deviceEdit, name="deviceEdit"),
+	url(r'^goodsList/$', goods.goodsList, name="goodsList"),
+	url(r'^goodsAdd/$', goods.goodsAdd, name="goodsAdd"),
+	url(r'^goodsDel/$', goods.goodsDel, name="goodsDel"),
+	url(r'^goodsEdit/$', goods.goodsEdit, name="goodsEdit"),
 	url(r'^main_view1/$', main.main_view1, name="home1"),
 	url(r'', main.main_view, name="home"),
 	]

@@ -67,6 +67,9 @@ def getData(user, opF, pS, cP, sN, oT):
 @login_required
 @csrf_exempt
 def statusList(request):
+	# for f in funcmodule.objects.all():
+	# 	if status_module.objects.filter(status_id=1,module_id=f.id).exists() == False:
+	# 		status_module.objects.create(status_id=1,module_id=f.id,creator=1,auth_type=1,remark='')
 	if request.method == "POST":
 		user = request.user
 		params = json.loads(request.body.decode())['params']['tips']

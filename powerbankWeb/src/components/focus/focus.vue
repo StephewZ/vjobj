@@ -51,9 +51,7 @@
         })
       },
       handleSet () {
-        console.log('123')
         this.$refs.setTab.addNewTab('setting', ['', 'setting'])
-        console.log(this.$refs.setTab.$emit('bridge'))
       }
     },
     components: {

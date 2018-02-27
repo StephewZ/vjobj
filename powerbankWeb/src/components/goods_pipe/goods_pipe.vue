@@ -54,10 +54,10 @@
 			<el-table-column type="index" prop="pipe_id">
 			</el-table-column>
 			<el-table-column
-	      label="商品信息">
+	      label="货道信息">
 	      <template slot-scope="scope">
 	        <el-popover trigger="hover" placement="top">
-	          <p>商品名称: {{ scope.row.name }}</p>
+	          <p>货道名称: {{ scope.row.name }}</p>
 	          <p>描述: {{ scope.row.remark }}</p>
 	          <p>创建用户: {{ scope.row.creator }}</p>
 	          <div slot="reference" class="name-wrapper">
@@ -66,7 +66,7 @@
 	        </el-popover>
 	      </template>
 	    </el-table-column>
-	    <el-table-column prop="goods_num" label="商品编号">
+	    <el-table-column prop="goods_pipe_num" label="货道编号">
 			</el-table-column>
 			<el-table-column prop="purchase_price" label="成本" sortable="custom">
 			</el-table-column>
@@ -100,19 +100,19 @@
 	  </div>
 
 	  <!--添加界面-->
-		<el-dialog title="添加商品" :visible.sync="loadOn.addFormVisible" :close-on-click-modal="true">
+		<el-dialog title="添加货道" :visible.sync="loadOn.addFormVisible" :close-on-click-modal="true">
 			<el-form :model="addForm" label-width="80px" :rules="FormRules" ref="addForm">
-				<el-form-item label="商品编号" prop="goods_num">
-					<el-input  v-model="addForm.goods_num" auto-complete="off" maxlength="25" minlength="1"></el-input>
+				<el-form-item label="货道编号" prop="goods_pipe_num">
+					<el-input  v-model="addForm.goods_pipe_num" auto-complete="off" maxlength="25" minlength="1"></el-input>
 				</el-form-item>
-				<el-form-item label="商品名称" prop="name">
+				<el-form-item label="货道名称" prop="name">
 					<el-input  v-model="addForm.name" auto-complete="off" maxlength="25" minlength="1"></el-input>
 				</el-form-item>
 
-				<el-form-item label="商品成本" prop="purchase_price">
+				<el-form-item label="货道成本" prop="purchase_price">
 					<el-input  v-model="addForm.purchase_price" auto-complete="off" maxlength="25" minlength="1"></el-input>
 				</el-form-item>
-				<el-form-item label="商品售价" prop="retail_price">
+				<el-form-item label="货道售价" prop="retail_price">
 					<el-input  v-model="addForm.retail_price" auto-complete="off" maxlength="25" minlength="1"></el-input>
 				</el-form-item>
 
@@ -142,19 +142,19 @@
 		</el-dialog>
 
 	  <!--编辑界面-->
-		<el-dialog title="商品编辑" :visible.sync="loadOn.editFormVisible" :close-on-click-modal="true">
+		<el-dialog title="货道编辑" :visible.sync="loadOn.editFormVisible" :close-on-click-modal="true">
 			<el-form :model="editForm" label-width="80px" :rules="FormRules" ref="editForm">
-				<el-form-item label="商品编号" prop="name">
-					<el-input  v-model="editForm.goods_num" auto-complete="off" maxlength="25" minlength="1"></el-input>
+				<el-form-item label="货道编号" prop="name">
+					<el-input  v-model="editForm.goods_pipe_num" auto-complete="off" maxlength="25" minlength="1"></el-input>
 				</el-form-item>
 
-				<el-form-item label="商品名称" prop="name">
+				<el-form-item label="货道名称" prop="name">
 					<el-input  v-model="editForm.name" auto-complete="off" maxlength="25" minlength="1"></el-input>
 				</el-form-item>
-				<el-form-item label="商品成本" prop="purchase_price">
+				<el-form-item label="货道成本" prop="purchase_price">
 					<el-input  v-model="editForm.purchase_price" auto-complete="off" maxlength="25" minlength="1"></el-input>
 				</el-form-item>
-				<el-form-item label="商品售价" prop="retail_price">
+				<el-form-item label="货道售价" prop="retail_price">
 					<el-input  v-model="editForm.retail_price" auto-complete="off" maxlength="25" minlength="1"></el-input>
 				</el-form-item>
 				<el-form-item label="所属机构" prop="pipe">
@@ -208,7 +208,7 @@
         }
       }
 	  	return {
-	  		crumbMsg: ['产品管理', '商品管理'],
+	  		crumbMsg: ['产品管理', '货道管理'],
 	  		filters: {
 	  			'optFilters': [],
 	  			'pageSize': 10,
@@ -232,12 +232,12 @@
 	  		delList: [],
 	  		options: [],
         FormRules: {
-        	goods_num: [
-						{ required: true, message: '请输入商品编号', trigger: 'blur' },
+        	goods_pipe_num: [
+						{ required: true, message: '请输入货道编号', trigger: 'blur' },
 						{ min: 1, max: 25, message: '长度在 1 到 25 个字符', trigger: 'blur' }
 					],
 					name: [
-						{ required: true, message: '请输入商品名称', trigger: 'blur' },
+						{ required: true, message: '请输入货道名称', trigger: 'blur' },
 						{ min: 1, max: 25, message: '长度在 1 到 25 个字符', trigger: 'blur' }
 					],
 					purchase_price: [
@@ -254,7 +254,7 @@
 				},
 				editForm: {},
 				addForm: {
-					goods_num: '',
+					goods_pipe_num: '',
 					name: '',
 					purchase_price: '',
 					retail_price: '',
@@ -269,8 +269,8 @@
 	  },
 	  methods: {
 	  	_getIndex (tip, url) {
-	  		tip = urls.goods.goodsIndex.tips
-	  		url = urls.goods.goodsIndex.url
+	  		tip = urls.goods_pipe.goods_pipeIndex.tips
+	  		url = urls.goods_pipe.goods_pipeIndex.url
 	  		getData(tip, url).then((res) => {
           if (res.code === ERR_OK) {
             this.options = formatList(res.data.options)
@@ -279,8 +279,8 @@
 	  	},
 	  	_getMsgList (tip, url) {
 	  		this.loadOn.tableLoading = true
-	  		tip = urls.goods.goodsList.tips
-	  		url = urls.goods.goodsList.url
+	  		tip = urls.goods_pipe.goods_pipeList.tips
+	  		url = urls.goods_pipe.goods_pipeList.url
 	  		const data = Object.assign({}, tip, this.filters)
 
 	  		getData(data, url).then((res) => {
@@ -341,11 +341,11 @@
       	this.delList = val
       },
       handleDel (row) {
-		  	this.$confirm(`确认删除商品：${row.name} ？`, '提示', {type: 'warning'}).then(() => {
-		  		let tip = urls.goods.goodsDel.tips
-		  		let url = urls.goods.goodsDel.url
+		  	this.$confirm(`确认删除货道：${row.name} ？`, '提示', {type: 'warning'}).then(() => {
+		  		let tip = urls.goods_pipe.goods_pipeDel.tips
+		  		let url = urls.goods_pipe.goods_pipeDel.url
 		  		const data = Object.assign({}, tip, {
-		  			'delList': [{'goods_num': row.goods_num, 'id': row.id}]
+		  			'delList': [{'goods_pipe_num': row.goods_pipe_num, 'id': row.id}]
 		  		})
           sendData(data, url).then((res) => {
           	let msg = ''
@@ -359,7 +359,7 @@
 	          	type = 'warning'
 	          	msg = '删除失败: 无权限！'
 	          } else if (res.code === 2) {
-	          	msg = '删除失败: 商品使用中，请先删除商品对应的货道！'
+	          	msg = '删除失败: 货道使用中，请先删除货道对应的货道！'
 	          	type = 'error'
 	          } else {
 	          	msg = '删除失败！'
@@ -372,7 +372,7 @@
         })
       },
       handleDels () {
-      	this.$confirm('货道正在使用的商品无法删除，是否继续？', '提示', {type: 'warning'}).then(() => {
+      	this.$confirm('货道正在使用的货道无法删除，是否继续？', '提示', {type: 'warning'}).then(() => {
 		  		let tip = urls.inst.instDel.tips
 		  		let url = urls.inst.instDel.url
 		  		const data = Object.assign({}, tip, {
@@ -413,8 +413,8 @@
 				this.$refs[formName].validate((valid) => {
 					if (valid) {
 						this.loadOn.addLoading = true
-						let tip = urls.goods.goodsAdd.tips
-						let url = urls.goods.goodsAdd.url
+						let tip = urls.goods_pipe.goods_pipeAdd.tips
+						let url = urls.goods_pipe.goods_pipeAdd.url
 						const data = Object.assign({
 							'p_price': mul(this.addForm.purchase_price, 100),
 							'r_price': mul(this.addForm.retail_price, 100)
@@ -432,7 +432,7 @@
 		          	msg = '添加失败: 无权限！'
 		          } else if (res.code === 2) {
 		          	type = 'warning'
-		          	msg = '添加失败: 商品编号重复！'
+		          	msg = '添加失败: 货道编号重复！'
 		          } else {
 		          	type = 'error'
 		          	msg = '发生错误，请刷新页面重试！'
@@ -462,8 +462,8 @@
 				this.$refs[formName].validate((valid) => {
 					if (valid) {
 						this.loadOn.editLoading = true
-						let tip = urls.goods.goodsEdit.tips
-						let url = urls.goods.goodsEdit.url
+						let tip = urls.goods_pipe.goods_pipeEdit.tips
+						let url = urls.goods_pipe.goods_pipeEdit.url
 						const data = Object.assign({
 							'p_price': mul(this.editForm.purchase_price, 100),
 							'r_price': mul(this.editForm.retail_price, 100)
@@ -481,7 +481,7 @@
 		          	msg = '编辑失败: 无权限！'
 		          } else if (res.code === 2) {
 		          	type = 'warning'
-		          	msg = '编辑失败：商品编号重复，机构已存在该商品编号！'
+		          	msg = '编辑失败：货道编号重复，机构已存在该货道编号！'
 		          } else {
 		          	type = '发生错误，请刷新页面重试！'
 		          	msg = 'error'

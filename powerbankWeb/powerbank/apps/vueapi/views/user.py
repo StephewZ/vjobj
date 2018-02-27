@@ -17,10 +17,10 @@ def getData(user, opF, pS, cP, sN, oT, mX, sL):
 	pipe_id = institutions.objects.get(id = user.inst_id).pipe_id
 	if len(opF) != 0 and pipe_id in opF[-1]:
 		opF = opF[-1]
+		opF = institutions.objects.filter(pipe_id = opF).values_list('id')
 	else:
-		opF = pipe_id	
-
-	opF = institutions.objects.filter(pipe_id__startswith = opF).values_list('id')
+		opF = pipe_id
+		opF = institutions.objects.filter(pipe_id__startswith = opF).values_list('id')
 	data = users.objects.filter(
 		Q(nickname__icontains = mX) |
 		Q(username__icontains = mX) |

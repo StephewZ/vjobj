@@ -11,7 +11,7 @@ from .permit import Authentication
 import json
 from datetime import datetime
 
-from users.models import users, institutions, status_user, status_module, devices, goods, goodsPipe, goodsPipe_device
+from users.models import users, institutions, status_user, status_module, devices, goods, goods_pipe, goods_pipe_device
 
 from ..models import device_inst
 
@@ -19,9 +19,10 @@ def getData(user, opF, pS, cP, sN, oT, mX):
 	pipe_id = institutions.objects.get(id = user.inst_id).pipe_id
 	if len(opF) != 0 and pipe_id in opF[-1]:
 		opF = opF[-1]
+		opF = institutions.objects.filter(pipe_id = opF).values_list('id')
 	else:
 		opF = pipe_id
-	opF = institutions.objects.filter(pipe_id__startswith = opF).values_list('id')
+		opF = institutions.objects.filter(pipe_id__startswith = opF).values_list('id')
 	data = devices.objects.filter(
 		Q(name__icontains = mX) |
 		Q(device_num__icontains = mX) |

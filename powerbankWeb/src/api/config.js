@@ -184,35 +184,35 @@ export const urls = {
 			}
 		}
 	},
-	goodsPipe: {
-		goodsPipeList: {
-			url: '/goodsPipeList/',
+	goods_pipe: {
+		goods_pipeList: {
+			url: '/goods_pipeList/',
 			tips: {
-				'tip': 'goodsPipeList'
+				'tip': 'goods_pipeList'
 			}
 		},
-		goodsPipeIndex: {
+		goods_pipeIndex: {
 			url: '/index/',
 			tips: {
-				'tip': 'goodsPipeIndex'
+				'tip': 'goods_pipeIndex'
 			}
 		},
-		goodsPipeAdd: {
-			url: '/goodsPipeAdd/',
+		goods_pipeAdd: {
+			url: '/goods_pipeAdd/',
 			tips: {
-				'tip': 'goodsPipeAdd'
+				'tip': 'goods_pipeAdd'
 			}
 		},
-		goodsPipeDel: {
-			url: '/goodsPipeDel/',
+		goods_pipeDel: {
+			url: '/goods_pipeDel/',
 			tips: {
-				'tip': 'goodsPipeDel'
+				'tip': 'goods_pipeDel'
 			}
 		},
-		goodsPipeEdit: {
-			url: '/goodsPipeEdit/',
+		goods_pipeEdit: {
+			url: '/goods_pipeEdit/',
 			tips: {
-				'tip': 'goodsPipeEdit'
+				'tip': 'goods_pipeEdit'
 			}
 		}
 	}

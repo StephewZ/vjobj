@@ -19,9 +19,10 @@ def getData(user, opF, pS, cP, sN, oT, mX):
 	pipe_id = institutions.objects.get(id = user.inst_id).pipe_id
 	if len(opF) != 0 and pipe_id in opF[-1]:
 		opF = opF[-1]
+		opF = institutions.objects.filter(pipe_id = opF).values_list('id')
 	else:
 		opF = pipe_id
-	opF = institutions.objects.filter(pipe_id__startswith = opF).values_list('id')
+		opF = institutions.objects.filter(pipe_id__startswith = opF).values_list('id')
 	data = devices.objects.filter(
 		Q(name__icontains = mX) |
 		Q(device_num__icontains = mX) |
