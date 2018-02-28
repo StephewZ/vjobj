@@ -51,7 +51,10 @@ def getData(user, opF, pS, cP, sN, oT, mX):
 			data = data.order_by('-retail_price')	
 
 	total = data.count()
-	data = data[(pS*cP-pS):pS*cP]
+	if pS == 'all':
+		data = goods.objects.filter(inst_id__in = opF)
+	else:	
+		data = data[(pS*cP-pS):pS*cP]
 
 	ndata = []
 	for d in data:

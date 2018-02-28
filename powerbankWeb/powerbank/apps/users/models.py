@@ -187,7 +187,7 @@ class withdrawals(models.Model):
 		db_table='withdrawals'
 
 class goods_pipe(models.Model):
-	goods_num = models.CharField(max_length=28, default='')
+	goods_pipe_num = models.CharField(max_length=28, default='')
 	goods_id = models.IntegerField(default=0)
 	name = models.CharField(max_length=28, default='')
 	currency = models.CharField(max_length=30, default='CNY')
@@ -212,7 +212,7 @@ class goods_pipe_device(models.Model):
 	remark = models.CharField(max_length=255, default='')
 
 	class Meta:
-		db_table='goods_Pipe_device'
+		db_table='goods_pipe_device'
 
 class goods(models.Model):
 	goods_num = models.CharField(max_length=28, default='')

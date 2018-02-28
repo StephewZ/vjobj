@@ -14,6 +14,8 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import HttpResponse, render_to_response, redirect, render
 from django.views.decorators.csrf import csrf_exempt
 
+from users.models import devices, goods, goods_pipe, goods_pipe_device
+
 class WxPayConf_pub(object):
     """配置账号信息"""
 
@@ -475,30 +477,45 @@ def paydetail(request):
 
 @csrf_exempt
 def payinfo(request):
-    device = request.POST.get('device', None)
-    return HttpResponse(json.dumps({'err_msg': 'ok', 'msg': {'total': 0.01}}))
+    params = json.loads(request.body.decode())['params']['tips']
+    device = params['device']
+    data = goods_pipe_device.objects.filter(device_id = devices.objects.get(device_num=device).id).order_by('sequence')
+    if len(data) != 0:
+        datas = []
+        for d in data:
+            obj = {}
+            gpipe = goods_pipe.objects.get(id=d.goods_pipe_id)
+            obj['retail_price'] = gpipe.retail_price/100
+            obj['goods_name'] = goods.objects.get(id=gpipe.goods_id).name
+            obj['name'] = gpipe.name
+            obj['remark'] = gpipe.remark
+            obj['sequence'] = d.sequence + 1
+            datas.append(obj)
+    return HttpResponse(json.dumps({'err_msg': 'ok', 'msg': datas}))
 
 @csrf_exempt
 def pay(request):
-	code = request.GET.get('code')
-	fp = urllib.request.urlopen("https://api.weixin.qq.com/sns/oauth2/access_token?appid="+WxPayConf_pub.APPID+"&secret="+WxPayConf_pub.APPSECRET+"&code="+code+"&grant_type=authorization_code")  
-	token = fp.read().decode('utf-8')  
-	tokenjson = json.loads(token)
-	openid = tokenjson['openid']
-	money = 0.01
-	money = int(float(money)*100)
-	jsApi = JsApi_pub()
-	unifiedOrder = UnifiedOrder_pub()
-	unifiedOrder.setParameter("openid",openid) #商品描述
-	unifiedOrder.setParameter("body","充值测试") #商品描述
-	timeStamp = time.time()
-	out_trade_no = "{0}{1}".format(WxPayConf_pub.APPID, int(timeStamp*100))
-	unifiedOrder.setParameter("out_trade_no", out_trade_no) #商户订单号
-	unifiedOrder.setParameter("total_fee", str(money)) #总金额
-	unifiedOrder.setParameter("notify_url", WxPayConf_pub.NOTIFY_URL) #通知地址 
-	unifiedOrder.setParameter("trade_type", "JSAPI") #交易类型
-	unifiedOrder.setParameter("attach", "6666") #附件数据，可分辨不同商家(string(127))
-	prepay_id = unifiedOrder.getPrepayId()
-	jsApi.setPrepayId(prepay_id)
-	jsApiParameters = jsApi.getParameters()
-	return HttpResponse(jsApiParameters)
+    params = json.loads(request.body.decode())['params']['tips']
+    code = params['code']
+    device = params['device']
+    sequence = params['sequence']
+    money = goods_pipe.objects.get(id = goods_pipe_device.objects.get(sequence=sequence,device_id=devices.objects.get(device_num=device).id).goods_pipe_id).retail_price
+    fp = urllib.request.urlopen("https://api.weixin.qq.com/sns/oauth2/access_token?appid="+WxPayConf_pub.APPID+"&secret="+WxPayConf_pub.APPSECRET+"&code="+code+"&grant_type=authorization_code")  
+    token = fp.read().decode('utf-8')  
+    tokenjson = json.loads(token)
+    openid = tokenjson['openid']
+    jsApi = JsApi_pub()
+    unifiedOrder = UnifiedOrder_pub()
+    unifiedOrder.setParameter("openid",openid) 
+    unifiedOrder.setParameter("body","测试") #商品描述
+    timeStamp = time.time()
+    out_trade_no = "{0}{1}".format(WxPayConf_pub.APPID, int(timeStamp*100))
+    unifiedOrder.setParameter("out_trade_no", out_trade_no) #商户订单号
+    unifiedOrder.setParameter("total_fee", str(money)) #总金额
+    unifiedOrder.setParameter("notify_url", WxPayConf_pub.NOTIFY_URL) #通知地址 
+    unifiedOrder.setParameter("trade_type", "JSAPI") #交易类型
+    unifiedOrder.setParameter("attach", "9110") #附件数据，可分辨不同商家(string(127))
+    prepay_id = unifiedOrder.getPrepayId()
+    jsApi.setPrepayId(prepay_id)
+    jsApiParameters = jsApi.getParameters()
+    return HttpResponse(jsApiParameters)

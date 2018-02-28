@@ -11,7 +11,7 @@ from .permit import Authentication
 import json
 from datetime import datetime
 
-from users.models import users, institutions, status_user, status_module, devices
+from users.models import users, institutions, status_user, status_module, devices, goods_pipe_device
 
 from ..models import device_inst
 
@@ -56,6 +56,7 @@ def getData(user, opF, pS, cP, sN, oT, mX):
 		obj['remark'] = d.remark
 		obj['made_time'] = datetime.strftime(d.create_time, "%Y-%m-%d %H:%M:%S")
 		obj['edit_time'] = datetime.strftime(d.edit_time, "%Y-%m-%d %H:%M:%S")
+		obj['goods_pipe'] = list(goods_pipe_device.objects.filter(device_id = d.id).order_by('sequence').values_list('goods_pipe_id', flat=True))
 		ndata.append(obj)
 	datas = {'total': total, 'data': ndata}
 	return datas
@@ -85,17 +86,29 @@ def deviceAdd(request):
 	if params['tip'] == 'deviceAdd':
 		if Authentication(params['tip'], user):
 			code = 0
+			dev_id = 0
+			now = datetime.now()
 			if devices.objects.filter(device_num=params['device_num'], status=0).exists():
-				now = datetime.now()
 				devices.objects.filter(device_num=params['device_num'], id=params['id']).update(name=params['name'],remark=params['remark'],
 					inst_id=institutions.objects.get(pipe_id=params['pipe'][-1]).id,creator=user.id, status = 1,edit_time=now,create_time=now)
+				dev_id = params['id']		
+
 			elif devices.objects.filter(device_num=params['device_num']).exists() == False and Authentication('admin', user):
-				devices.objects.create(device_num=params['device_num'],name=params['name'],remark=params['remark'],
+				dev_ = devices.objects.create(device_num=params['device_num'],name=params['name'],remark=params['remark'],
 					inst_id=institutions.objects.get(pipe_id=params['pipe'][-1]).id,creator=user.id, status = 0)
+				dev_id = dev_.id
 			elif devices.objects.filter(device_num=params['device_num']).exists():
 				code = 2
 			else:
 				code = 3
+
+			if dev_id != 0:
+				for p in range(len(params['goods_pipe'])):
+					if goods_pipe_device.objects.filter(device_id=dev_.id, sequence = p).exists():
+						goods_pipe_device.objects.filter(device_id=dev_.id, sequence = p).update(goods_pipe_id = params['goods_pipe'][p],edit_time=now)
+					else:
+						goods_pipe_device.objects.create(device_id=dev_.id, sequence = p, goods_pipe_id = params['goods_pipe'][p])
+				goods_pipe_device.objects.filter(sequence__gt = len(params['goods_pipe'])).delete()	
 		else:
 			msg = 'denied'
 			code = 404
@@ -137,8 +150,16 @@ def deviceEdit(request):
 	if params['tip'] == 'deviceEdit':
 		if Authentication(params['tip'], user):
 			code = 0
+			now = datetime.now()
 			devices.objects.filter(device_num=params['device_num'], id = params['id']).update(name=params['name'],inst_id=institutions.objects.get(pipe_id=params['pipe'][-1]).id,
-				remark=params['remark'], edit_time = datetime.now())
+				remark=params['remark'], edit_time = now)
+
+			for p in range(len(params['goods_pipe'])):
+				if goods_pipe_device.objects.filter(device_id=params['id'], sequence = p).exists():
+					goods_pipe_device.objects.filter(device_id=params['id'], sequence = p).update(goods_pipe_id = params['goods_pipe'][p],edit_time=now)
+				else:
+					goods_pipe_device.objects.create(device_id=params['id'], sequence = p, goods_pipe_id = params['goods_pipe'][p])
+			goods_pipe_device.objects.filter(sequence__gt = len(params['goods_pipe'])).delete()
 		else:
 			msg = 'denied'
 			code = 404		

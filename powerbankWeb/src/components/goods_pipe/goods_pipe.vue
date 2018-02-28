@@ -51,7 +51,7 @@
 		<el-table :data="msgList" highlight-current-row v-loading="loadOn.tableLoading" @sort-change="sortChange" @selection-change="selectChange">
 			<el-table-column type="selection">
 			</el-table-column>
-			<el-table-column type="index" prop="pipe_id">
+			<el-table-column type="index">
 			</el-table-column>
 			<el-table-column
 	      label="货道信息">
@@ -68,12 +68,13 @@
 	    </el-table-column>
 	    <el-table-column prop="goods_pipe_num" label="货道编号">
 			</el-table-column>
+			<el-table-column prop="goods_name" label="商品名称">
+			</el-table-column>
 			<el-table-column prop="purchase_price" label="成本" sortable="custom">
 			</el-table-column>
 			<el-table-column prop="retail_price" label="售价" sortable="custom">
 			</el-table-column>
-			<el-table-column prop="parent" label="所属机构">
-			</el-table-column>
+			
 			<el-table-column prop="made_time" label="添加时间" sortable="custom">
 			</el-table-column>
 			<el-table-column prop="edit_time" label="最近编辑" sortable="custom">
@@ -109,22 +110,27 @@
 					<el-input  v-model="addForm.name" auto-complete="off" maxlength="25" minlength="1"></el-input>
 				</el-form-item>
 
-				<el-form-item label="货道成本" prop="purchase_price">
+				<el-form-item label="选择商品" prop="goods">
+				  <el-select v-model="addForm.goods" filterable placeholder="请选择商品">
+				    <el-option
+				      v-for="item in goodsOptions"
+				      :key="item.value"
+				      :label="item.label"
+				      :value="item.value"
+				      :change="optionsAddChange(item.pp, item.rp)"
+				      :visible-change="visibleAdd">
+				      <span style="float: left">{{ item.label }}</span>
+				      <span style="float: right; color: #8492a6; font-size: 13px">{{ item.goods_num }}</span>
+				    </el-option>
+				  </el-select>
+				</el-form-item>
+				<el-form-item label="商品成本" prop="purchase_price">
 					<el-input  v-model="addForm.purchase_price" auto-complete="off" maxlength="25" minlength="1"></el-input>
 				</el-form-item>
-				<el-form-item label="货道售价" prop="retail_price">
+				<el-form-item label="商品售价" prop="retail_price">
 					<el-input  v-model="addForm.retail_price" auto-complete="off" maxlength="25" minlength="1"></el-input>
 				</el-form-item>
 
-				<el-form-item label="所属机构" prop="pipe">
-					<el-cascader
-				    placeholder="请选择机构"
-				    :options="options"
-				    filterable
-				    v-model="addForm.pipe"
-				    change-on-select
-				  ></el-cascader>
-				</el-form-item>
 				<el-form-item label="描述" prop="remark">
 					<el-input
 					  type="textarea"
@@ -147,24 +153,28 @@
 				<el-form-item label="货道编号" prop="name">
 					<el-input  v-model="editForm.goods_pipe_num" auto-complete="off" maxlength="25" minlength="1"></el-input>
 				</el-form-item>
-
 				<el-form-item label="货道名称" prop="name">
 					<el-input  v-model="editForm.name" auto-complete="off" maxlength="25" minlength="1"></el-input>
 				</el-form-item>
-				<el-form-item label="货道成本" prop="purchase_price">
+				<el-form-item label="选择商品" prop="goods">
+				  <el-select v-model="editForm.goods" filterable placeholder="请选择商品">
+				    <el-option
+				      v-for="item in goodsOptions"
+				      :key="item.value"
+				      :label="item.label"
+				      :value="item.value"
+				      :change="optionsEditChange(item.pp, item.rp)"
+				      :visible-change="visibleEdit">
+				      <span style="float: left">{{ item.label }}</span>
+				      <span style="float: right; color: #8492a6; font-size: 13px">{{ item.goods_num }}</span>
+				    </el-option>
+				  </el-select>
+				</el-form-item>
+				<el-form-item label="商品成本" prop="purchase_price">
 					<el-input  v-model="editForm.purchase_price" auto-complete="off" maxlength="25" minlength="1"></el-input>
 				</el-form-item>
-				<el-form-item label="货道售价" prop="retail_price">
+				<el-form-item label="商品售价" prop="retail_price">
 					<el-input  v-model="editForm.retail_price" auto-complete="off" maxlength="25" minlength="1"></el-input>
-				</el-form-item>
-				<el-form-item label="所属机构" prop="pipe">
-					<el-cascader
-				    placeholder="请选择机构"
-				    :options="options"
-				    filterable
-				    v-model="editForm.pipe"
-				    change-on-select
-				  ></el-cascader>
 				</el-form-item>
 				<el-form-item label="描述" prop="remark">
 					<el-input
@@ -188,8 +198,8 @@
 	import Crumb from 'components/crumb/crumb'
 	import {getData, sendData} from 'api/data'
 	import {urls, ERR_OK} from 'api/config'
-	import {formatList, msgNotice} from 'common/js/dom'
-	import {mul} from 'common/js/arit'
+	import {formatList, msgNotice, formatGoodsList} from 'common/js/dom'
+	import {mul, div} from 'common/js/arit'
 
 	export default {
 	  name: 'group',
@@ -231,6 +241,7 @@
 	  		msgList: [],
 	  		delList: [],
 	  		options: [],
+	  		goodsOptions: [],
         FormRules: {
         	goods_pipe_num: [
 						{ required: true, message: '请输入货道编号', trigger: 'blur' },
@@ -248,17 +259,19 @@
 						{ required: true, validator: validatePrice, trigger: 'blur' },
 						{ min: 1, max: 25, trigger: 'blur' }
 					],
-					pipe: [
-						{ required: true, message: '请选择上级机构', trigger: 'change' }
+					goods: [
+						{ required: true, message: '请选择商品', trigger: 'change' }
 					]
 				},
+				visibleAddBool: false,
+				visibleEditBool: false,
 				editForm: {},
 				addForm: {
 					goods_pipe_num: '',
 					name: '',
 					purchase_price: '',
 					retail_price: '',
-					pipe: [],
+					goods: '',
 					remark: ''
 				}
 	  	}
@@ -274,6 +287,7 @@
 	  		getData(tip, url).then((res) => {
           if (res.code === ERR_OK) {
             this.options = formatList(res.data.options)
+            this.goodsOptions = formatGoodsList(res.data.goodsOptions)
           }
         })
 	  	},
@@ -293,6 +307,24 @@
           this.loadOn.searchLoad = false
           this.loadOn.refreshLoad = false
         })
+	  	},
+	  	visibleAdd (val) {
+	  		this.visibleAddBool = val
+	  	},
+	  	visibleEdit (val) {
+	  		this.visibleEditBool = val
+	  	},
+	  	optionsAddChange (pp, rp) {
+	  		if (this.addForm.goods && this.visibleAddBool) {
+  				this.addForm.purchase_price = div(pp, 100) + ''
+  				this.addForm.retail_price = div(rp, 100) + ''
+	  		}
+	  	},
+	  	optionsEditChange (pp, rp) {
+	  		if (this.editForm.goods && this.visibleEditBool) {
+	  			this.editForm.purchase_price = div(pp, 100) + ''
+	  			this.editForm.retail_price = div(rp, 100) + ''
+	  		}
 	  	},
 	  	searchBtn () {
 	  		this.loadOn.searchLoad = true
@@ -359,7 +391,7 @@
 	          	type = 'warning'
 	          	msg = '删除失败: 无权限！'
 	          } else if (res.code === 2) {
-	          	msg = '删除失败: 货道使用中，请先删除货道对应的货道！'
+	          	msg = '删除失败: 货道使用中，请先解除货道与设备的绑定！'
 	          	type = 'error'
 	          } else {
 	          	msg = '删除失败！'
@@ -372,9 +404,9 @@
         })
       },
       handleDels () {
-      	this.$confirm('货道正在使用的货道无法删除，是否继续？', '提示', {type: 'warning'}).then(() => {
-		  		let tip = urls.inst.instDel.tips
-		  		let url = urls.inst.instDel.url
+      	this.$confirm('正在使用中的货道无法删除，是否继续？', '提示', {type: 'warning'}).then(() => {
+		  		let tip = urls.goods_pipe.goods_pipeDel.tips
+		  		let url = urls.goods_pipe.goods_pipeDel.url
 		  		const data = Object.assign({}, tip, {
 		  			'delList': this.delList
 		  		})
@@ -451,12 +483,7 @@
 			},
 			handleEdit (row) {
 				this.loadOn.editFormVisible = true
-				let len = this.options[0].value.length
-				let pipe = []
-				for (let i = 0; i < (row.pipe_id.length - len) / 4 + 1; i++) {
-					pipe.push(row.pipe_id.slice(0, len + i * 4))
-				}
-				this.editForm = Object.assign({'pipe': pipe}, row)
+				this.editForm = Object.assign({}, row)
 			},
 			editSubmit (formName) {
 				this.$refs[formName].validate((valid) => {

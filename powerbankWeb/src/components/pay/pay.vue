@@ -5,8 +5,15 @@
 				<h2>Powerbank</h2>
 				<p>点击按钮支付成功后获取密码！<br />
 				设备编号: {{ device }}<br />
-				金额: {{ total }}元
 				</p>
+				<div style="margin-bottom: 30px">
+					<el-radio v-for="item in msg"
+					style="margin: 0 0 10px 0; display: block; text-align: left; background:white"
+					v-model="radiohead"
+					:label="item.sequence"
+					border
+					>{{ item.name }}  {{ item.goods_name }} 售价: {{ item.retail_price }} 元 {{ item.remark }}</el-radio>
+				</div>
 				<ul>
 					<el-button class="actions" type="danger" :loading="payLoad" :disabled="paySub" @click="payBtn">激  活</el-button>
 				</ul>
@@ -23,9 +30,10 @@
 	  	return {
 	  		device: this.$route.query.device,
 	  		code: this.$route.query.code,
-	  		total: '',
 	  		payLoad: false,
-	  		paySub: true
+	  		paySub: true,
+	  		radiohead: 1,
+	  		msg: []
 	  	}
 	  },
 	  created () {
@@ -37,7 +45,7 @@
 	  		let url = '/payinfo'
 	  		sendData({'device': device}, url).then((res) => {
 	  			if (res.err_msg === 'ok') {
-	  				this.total = res.msg.total
+	  				this.msg = res.msg
 	  				this.paySub = false
 	  			}
 	  		})
@@ -46,11 +54,10 @@
 	  		let url = '/paydetail'
 	  		let data = {
 	  			'device': this.device,
+	  			'sequence': this.radiohead,
 	  			'code': this.code
 	  		}
-	  		console.log(data)
 	  		sendData(data, url).then((res) => {
-	  			console.log(res)
 	  			let jsonobj = res
 		  		WeixinJSBridge.invoke('getBrandWCPayRequest', {
 			      'appId': jsonobj.appId, // 公众号名称，由商户传入
@@ -65,6 +72,9 @@
 								message: '支付成功',
 								type: 'success',
 						    showClose: true
+						  })
+						  sendData({'device': this.device, 'sequence': this.radiohead}, '/sendMQ').then((res) => {
+
 						  })
 			      } else {
 			      	this.$message({

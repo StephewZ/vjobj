@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from django.conf.urls import url
-from .views import main, inst, user, status, device, wx, goods, goods_pipe
+from .views import main, inst, user, status, device, wx, goods, goods_pipe,send
 from .pay import wxpay
 from users.views import user_login, get_userinfo, logout_view, set_info
 from django.views.generic import TemplateView
@@ -14,6 +14,7 @@ urlpatterns = [
 	url(r'^paydetail', wx.pay, name="paydetail"),
 	url(r'^payinfo$', wx.payinfo, name="payinfo"),
 	url(r'^pay/payback_url$', main.payback_url, name="payback_url"),
+	url(r'^sendMQ$', send.sendMQ, name="sendMQ"),
 	url(r'^login_in/$', user_login, name="login_in"),
 	url(r'^userinfo/$', get_userinfo, name="userinfo"),
 	url(r'^userSet/$', set_info, name="setInfo"),
@@ -39,6 +40,10 @@ urlpatterns = [
 	url(r'^goodsAdd/$', goods.goodsAdd, name="goodsAdd"),
 	url(r'^goodsDel/$', goods.goodsDel, name="goodsDel"),
 	url(r'^goodsEdit/$', goods.goodsEdit, name="goodsEdit"),
+	url(r'^goods_pipeList/$', goods_pipe.goods_pipeList, name="goods_pipeList"),
+	url(r'^goods_pipeAdd/$', goods_pipe.goods_pipeAdd, name="goods_pipeAdd"),
+	url(r'^goods_pipeDel/$', goods_pipe.goods_pipeDel, name="goods_pipeDel"),
+	url(r'^goods_pipeEdit/$', goods_pipe.goods_pipeEdit, name="goods_pipeEdit"),
 	url(r'^main_view1/$', main.main_view1, name="home1"),
 	url(r'', main.main_view, name="home"),
 	]

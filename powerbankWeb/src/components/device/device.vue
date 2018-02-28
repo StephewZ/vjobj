@@ -106,6 +106,20 @@
 				    change-on-select
 				  ></el-cascader>
 				</el-form-item>
+				<el-form-item label="绑定货道" prop="goods_pipe">
+					<el-transfer
+				    v-model="addForm.goods_pipe"
+				    filterable
+				    :titles="['货道列表', '绑定列表']"
+				    :button-texts="['解绑', '绑定']"
+				    :format="{
+				      noChecked: '${total}',
+				      hasChecked: '${checked}/${total}'
+				    }"
+				    @change="handleGoodsPipeChange"
+				    :data="goods_pipeList">
+				  </el-transfer>
+				</el-form-item>
 				<el-form-item label="设备描述" prop="remark">
 					<el-input
 					  type="textarea"
@@ -140,6 +154,22 @@
 				    change-on-select
 				  ></el-cascader>
 				</el-form-item>
+
+				<el-form-item label="绑定货道" prop="goods_pipe">
+					<el-transfer
+				    v-model="editForm.goods_pipe"
+				    filterable
+				    :titles="['货道列表', '绑定列表']"
+				    :button-texts="['解绑', '绑定']"
+				    :format="{
+				      noChecked: '${total}',
+				      hasChecked: '${checked}/${total}'
+				    }"
+				    @change="handleGoodsPipeChangeEdit"
+				    :data="goods_pipeList">
+				  </el-transfer>
+				</el-form-item>
+
 				<el-form-item label="设备描述" prop="remark">
 					<el-input
 					  type="textarea"
@@ -162,7 +192,7 @@
 	import Crumb from 'components/crumb/crumb'
 	import {getData, sendData} from 'api/data'
 	import {urls, ERR_OK} from 'api/config'
-	import {formatList, msgNotice} from 'common/js/dom'
+	import {formatList, formatGoodsPipeList, msgNotice} from 'common/js/dom'
 
 	export default {
 	  name: 'group',
@@ -191,6 +221,7 @@
 	  		msgList: [],
 	  		delList: [],
 	  		options: [],
+	  		goods_pipeList: [],
         FormRules: {
         	device_num: [
 						{ required: true, message: '请输入设备编号', trigger: 'blur' }
@@ -205,6 +236,7 @@
 				editForm: {},
 				addForm: {
 					device_num: '',
+					goods_pipe: [],
 					name: '',
 					pipe: [],
 					remark: ''
@@ -222,6 +254,7 @@
 	  		getData(tip, url).then((res) => {
           if (res.code === ERR_OK) {
             this.options = formatList(res.data.options)
+            this.goods_pipeList = formatGoodsPipeList(res.data.goods_pipeList)
           }
         })
 	  	},
@@ -276,6 +309,36 @@
 	  			this.filters.orderType = ''
 	  		}
 	  		this._getMsgList()
+	  	},
+	  	handleGoodsPipeChange () {
+	  		console.log('1')
+	  		let k = 0
+  			for (let j = 0; j < this.goods_pipeList.length; j++) {
+  				this.goods_pipeList[j]['label'] = '* - ' + this.goods_pipeList[j]['label'].substr(this.goods_pipeList[j]['label'].indexOf(' - ') + 3)
+  			}
+  			for (let i = 0; i < this.addForm.goods_pipe.length; i++) {
+  				for (let j = 0; j < this.goods_pipeList.length; j++) {
+  					if (this.addForm.goods_pipe[i] === this.goods_pipeList[j]['key']) {
+  						k++
+  						this.goods_pipeList[j]['label'] = k + ' - ' + this.goods_pipeList[j]['label'].substr(this.goods_pipeList[j]['label'].indexOf(' - ') + 3)
+  					}
+  				}
+  			}
+	  	},
+	  	handleGoodsPipeChangeEdit () {
+	  		console.log('2')
+	  		let k = 0
+  			for (let j = 0; j < this.goods_pipeList.length; j++) {
+  				this.goods_pipeList[j]['label'] = '* - ' + this.goods_pipeList[j]['label'].substr(this.goods_pipeList[j]['label'].indexOf(' - ') + 3)
+  			}
+  			for (let i = 0; i < this.editForm.goods_pipe.length; i++) {
+  				for (let j = 0; j < this.goods_pipeList.length; j++) {
+  					if (this.editForm.goods_pipe[i] === this.goods_pipeList[j]['key']) {
+  						k++
+  						this.goods_pipeList[j]['label'] = k + ' - ' + this.goods_pipeList[j]['label'].substr(this.goods_pipeList[j]['label'].indexOf(' - ') + 3)
+  					}
+  				}
+  			}
 	  	},
 	  	handleSizeChange (val) {
         this.filters.pageSize = val
@@ -356,6 +419,7 @@
 			},
 			handleAdd () {
 				this.loadOn.addFormVisible = true
+				this.handleGoodsPipeChange()
 			},
 			addSubmit (formName) {
 				this.$refs[formName].validate((valid) => {
@@ -405,6 +469,7 @@
 					pipe.push(row.pipe_id.slice(0, len + i * 4))
 				}
 				this.editForm = Object.assign({'pipe': pipe}, row)
+				this.handleGoodsPipeChangeEdit()
 			},
 			editSubmit (formName) {
 				this.$refs[formName].validate((valid) => {
@@ -447,5 +512,6 @@
 	}
 </script>
 <style scoped lang="stylus" rel="stylesheet/stylus">
-		
+		// >>> .el-dialog
+		// 	width: 60%
 </style>

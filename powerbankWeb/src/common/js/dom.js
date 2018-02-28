@@ -1,3 +1,4 @@
+import {div} from './arit'
 
 export function formatList (options) {
 	let newOptions = []
@@ -25,6 +26,37 @@ export function formatList (options) {
 				cloneNewOp.push(obj)
 			}
 		}
+	}
+	return newOptions
+}
+
+export function formatGoodsPipeList (options) {
+	let newOptions = []
+	for (let i = 0; i < options.length; i++) {
+		let obj = {}
+		obj['key'] = options[i][0]
+		// obj['label'] = {
+		// 	'goods_pipe_num': options[i][1],
+		// 	'name': options[i][2],
+		// 	'purchase_price': options[i][3],
+		// 	'retail_price': options[i][4]
+		// }
+		obj['label'] =  '* - ' + options[i][1] + ' ' + options[i][2] + ' ' + div(options[i][3], 100) + '/' + div(options[i][4], 100)
+		newOptions.push(obj)
+	}
+	return newOptions
+}
+
+export function formatGoodsList (options) {
+	let newOptions = []
+	for (let i = 0; i < options.length; i++) {
+		let obj = {}
+		obj['label'] = options[i][0]
+		obj['goods_num'] = options[i][1]
+		obj['value'] = options[i][2]
+		obj['pp'] = options[i][3]
+		obj['rp'] = options[i][4]
+		newOptions.push(obj)
 	}
 	return newOptions
 }
