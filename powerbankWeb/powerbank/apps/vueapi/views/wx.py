@@ -472,7 +472,7 @@ class UnifiedOrder_pub(Wxpay_client_pub):
 def paydetail(request):
 	device = request.GET.get('device')
 	re_url = "http://weixin.gzncloud.com/get-weixin-code.html?appid={0}&scope=snsapi_base&state=STATE&redirect_uri={1}"
-	into_url = "http://powerbank.gzncloud.com/pay/paying/?device=" + device + "/"
+	into_url = "http://powerbank.gzncloud.com/pay/paying/?device=" + device
 	return HttpResponseRedirect(re_url.format(WxPayConf_pub.APPID, into_url))
 
 @csrf_exempt
@@ -499,9 +499,9 @@ def pay(request):
     code = params['code']
     device = params['device']
     sequence = params['sequence']
-    money = goods_pipe.objects.get(id = goods_pipe_device.objects.get(sequence=sequence,device_id=devices.objects.get(device_num=device).id).goods_pipe_id).retail_price
+    money = goods_pipe.objects.get(id = goods_pipe_device.objects.get(sequence=sequence-1,device_id=devices.objects.get(device_num=device).id).goods_pipe_id).retail_price
     fp = urllib.request.urlopen("https://api.weixin.qq.com/sns/oauth2/access_token?appid="+WxPayConf_pub.APPID+"&secret="+WxPayConf_pub.APPSECRET+"&code="+code+"&grant_type=authorization_code")  
-    token = fp.read().decode('utf-8')  
+    token = fp.read().decode('utf-8')
     tokenjson = json.loads(token)
     openid = tokenjson['openid']
     jsApi = JsApi_pub()
