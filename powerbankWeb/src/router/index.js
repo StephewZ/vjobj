@@ -15,6 +15,18 @@ const Pay = (resolve) => {
   })
 }
 
+// const Pay = (resolve) => {
+//   import('components/pay/pay').then((module) => {
+//     resolve(module)
+//   })
+// }
+
+// const Paydrink = (resolve) => {
+//   import('components/paydrink/paydrink').then((module) => {
+//     resolve(module)
+//   })
+// }
+
 export default new Router({
   mode: 'history',
   routes: [
@@ -32,7 +44,8 @@ export default new Router({
       name: 'Pay',
       query: {
         code: 'code',
-        device: 'device'
+        device: 'device',
+        webtype: 'webtype'
       },
       component: Pay
     }

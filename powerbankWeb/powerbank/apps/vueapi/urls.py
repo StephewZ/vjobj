@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from django.conf.urls import url
-from .views import main, inst, user, status, device, wx, goods, goods_pipe,send
+from .views import main, inst, user, status, device, wx, goods, goods_pipe, sendMQ
 from .pay import wxpay
 from users.views import user_login, get_userinfo, logout_view, set_info
 from django.views.generic import TemplateView
@@ -14,7 +14,7 @@ urlpatterns = [
 	url(r'^paydetail', wx.pay, name="paydetail"),
 	url(r'^payinfo$', wx.payinfo, name="payinfo"),
 	url(r'^pay/payback_url$', main.payback_url, name="payback_url"),
-	url(r'^sendMQ$', send.sendMQ, name="sendMQ"),
+	url(r'^sendMQ$', sendMQ.sendMQ, name="sendMQ"),
 	url(r'^login_in/$', user_login, name="login_in"),
 	url(r'^userinfo/$', get_userinfo, name="userinfo"),
 	url(r'^userSet/$', set_info, name="setInfo"),

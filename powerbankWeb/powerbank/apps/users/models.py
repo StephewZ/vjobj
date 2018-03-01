@@ -121,6 +121,7 @@ class devices(models.Model):
 	user_id = models.IntegerField(null=True, blank=True)
 	status = models.IntegerField(default=0)
 	name = models.CharField(max_length=48, default='')
+	device_type = models.IntegerField(default=1)
 	creator = models.IntegerField(default=1)
 	create_time = models.DateTimeField(default=datetime.now)
 	edit_time = models.DateTimeField(default=datetime.now)
